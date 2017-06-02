@@ -1,0 +1,82 @@
+#!/usr/bin/env python
+
+import argparse
+import sys
+import os
+import json
+
+def nonnegative(x):
+    x = int(x)
+    if x < 0:
+        raise argparse.ArgumentTypeError("Negative integer")
+    return x
+
+class NHL:
+
+    GAMES_FILE="games.json"
+
+    def _parse_args(self):
+        parser = argparse.ArgumentParser(
+            description='Command line tool for managing nhl statistics',
+            usage='''nhl <command> [<args>]
+
+The most commonly used nhl commands are:
+   add     Add a game entry
+   suggest Get a suggestion of who you should challenge
+   stats   Print the current standings
+''')
+
+        subparsers = parser.add_subparsers(help='Subcommand to run', dest='command')
+
+        add_parser = subparsers.add_parser('add',
+            description='Add a game entry',
+            usage='''nhl add <home> <away> <home_score> <away_score> [-o|--over-time]''')
+        add_parser.add_argument('home', type=str.upper, help='home player')
+        add_parser.add_argument('away', type=str.upper, help='away player')
+        add_parser.add_argument('home_score', type=nonnegative, help='score of the home player')
+        add_parser.add_argument('away_score', type=nonnegative, help='score of the away player')
+        add_parser.add_argument('-o', '--overtime', action='store_true', help='specify if the game was finished in overtime')
+
+        suggest_parser = subparsers.add_parser('suggest')
+        suggest_parser.add_argument('player', help='player')
+
+        stats_parser = subparsers.add_parser('stats')
+
+        return parser.parse_args()
+
+    def run_command(self):
+        args = self._parse_args()
+        getattr(self, args.command)(args)
+
+    def load(self):
+        if os.path.exists(NHL.GAMES_FILE):
+            with open(NHL.GAMES_FILE) as data_file:
+                self.data = json.load(data_file)
+        else:
+            self.data = []
+
+    def save(self):
+        with open(NHL.GAMES_FILE, 'w') as data_file:
+            json.dump(self.data, data_file, indent=4, separators=(',', ': '))
+
+    def add(self, args):
+        self.data.append({ "home"    : args.home,
+                           args.home : args.home_score,
+                           args.away : args.away_score,
+                           "OT"      : args.overtime
+                         })
+        overtime_print = ", OT" if args.overtime else ""
+        print "Successfully added game \"%s @ %s: %d-%d%s\"" % (args.away, args.home, args.away_score, args.home_score, overtime_print)
+
+    def suggest(self, args):
+        pass
+
+    def stats(self, args):
+        pass
+
+
+if __name__ == '__main__':
+    nhl = NHL()
+    nhl.load()
+    nhl.run_command()
+    nhl.save()
