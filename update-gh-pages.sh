@@ -15,7 +15,7 @@ cd nhl
 git remote rm origin
 git remote add origin https://${GH_TOKEN}@github.com/SoamJaws/nhl.git
 git fetch
-git checkout gh-pages
+git checkout -b gh-pages
 git rebase master
 ./nhl html > index.html
 
