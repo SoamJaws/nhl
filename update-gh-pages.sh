@@ -14,7 +14,7 @@ git clone --quiet https://${GH_TOKEN}@github.com/SoamJaws/nhl.git > /dev/null
 cd nhl
 git remote rm origin
 git remote add origin https://${GH_TOKEN}@github.com/SoamJaws/nhl.git
-./nhl stats > index.html
+./nhl html > index.html
 
 #add, commit and push files
 git add index.html

@@ -78,6 +78,8 @@ The most commonly used nhl commands are:
 
         stats_parser = subparsers.add_parser('stats')
 
+        html_parser = subparsers.add_parser('html')
+
         return parser.parse_args()
 
     def run_command(self):
@@ -274,6 +276,19 @@ The most commonly used nhl commands are:
         self.players = list(self.players.values())
         self.players.sort(reverse=True)
         self._print_rows()
+
+    def html(self, args):
+        self._init_players()
+        self.players = list(self.players.values())
+        self.players.sort(reverse=True)
+        print "<!DOCTYPE html>"
+        print "<html>"
+        print "<head><title>NHL STEGEN 3.0</title><link rel=\"stylesheet\" href=\"styles.css\"></head>"
+        print "<body>"
+        for row in self._get_rows():
+            print "<pre>%s</pre>" % row
+        print "<body>"
+        print "<html>"
 
 
 if __name__ == '__main__':
