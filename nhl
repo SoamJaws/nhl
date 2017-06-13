@@ -37,7 +37,7 @@ class Player:
     @property
     def wlr(self):
         losses = self.l + self.ot
-        return self.w/float(losses) if losses  > 0 else 10.0
+        return self.w/float(losses) if losses > 0 else 10.0
 
     @property
     def diff(self):
