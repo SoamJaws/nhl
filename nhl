@@ -200,35 +200,37 @@ The most commonly used nhl commands are:
         self.diff_w   = max(4, max([ len(str(p.diff)) for p in self.players ]))
         self.total_w  = self.player_w + self.wlr_w + self.gp_w + self.w_w + self.l_w + self.ot_w + self.gf_w + self.ga_w + self.diff_w + 26
 
-    def _print_filled_line(self, c):
-        print self.format_string_line % ( c * self.player_w
-                                        , c * self.wlr_w
-                                        , c * self.gp_w
-                                        , c * self.w_w
-                                        , c * self.l_w
-                                        , c * self.ot_w
-                                        , c * self.gf_w
-                                        , c * self.ga_w
-                                        , c * self.diff_w
-                                        )
+    def _get_filled_line(self, c):
+        return self.format_string_line % ( c * self.player_w
+                                         , c * self.wlr_w
+                                         , c * self.gp_w
+                                         , c * self.w_w
+                                         , c * self.l_w
+                                         , c * self.ot_w
+                                         , c * self.gf_w
+                                         , c * self.ga_w
+                                         , c * self.diff_w
+                                         )
 
-    def _print_header(self):
-        self._print_filled_line("-")
-        print "|" + self.season.replace("_", " ").center(self.total_w) + "|"
-        self._print_filled_line("-")
-        print self.format_string_row % ( "Player"
-                                       , "WLR"
-                                       , "GP"
-                                       , "W"
-                                       , "L"
-                                       , "OT"
-                                       , "GF"
-                                       , "GA"
-                                       , "DIFF"
-                                       )
-        self._print_filled_line("-")
+    def _get_header(self):
+        rows = []
+        rows.append(self._get_filled_line("-"))
+        rows.append("|" + self.season.replace("_", " ").center(self.total_w) + "|")
+        rows.append(self._get_filled_line("-"))
+        rows.append(self.format_string_row % ( "Player"
+                                             , "WLR"
+                                             , "GP"
+                                             , "W"
+                                             , "L"
+                                             , "OT"
+                                             , "GF"
+                                             , "GA"
+                                             , "DIFF"
+                                             ))
+        rows.append(self._get_filled_line("-"))
+        return rows
 
-    def _print_rows(self):
+    def _get_rows(self):
         self._set_widths()
 
         self.format_string_row = (("| %%-%ds | %%-%ds " + "| %%-%ds " * 7 + "|")) % ( self.player_w
@@ -243,23 +245,29 @@ The most commonly used nhl commands are:
                                                                                     )
         self.format_string_line = ("|" + self.format_string_row[1:-1].replace(" ", "-").replace("|", "-") + "|")
 
-        self._print_header()
+        rows = []
+        rows.extend(self._get_header())
 
         position = 0
         for player in self.players:
             position += 1
-            print self.format_string_row % ( player.name
-                                           , "%.2f" % player.wlr
-                                           , player.gp
-                                           , player.w
-                                           , player.l
-                                           , player.ot
-                                           , player.gf
-                                           , player.ga
-                                           , player.diff
-                                           )
+            rows.append(self.format_string_row % ( player.name
+                                                 , "%.2f" % player.wlr
+                                                 , player.gp
+                                                 , player.w
+                                                 , player.l
+                                                 , player.ot
+                                                 , player.gf
+                                                 , player.ga
+                                                 , player.diff
+                                                 ))
 
-        self._print_filled_line("-")
+        rows.append(self._get_filled_line("-"))
+        return rows
+
+    def _print_rows(self):
+        for row in self._get_rows():
+            print row
 
     def stats(self, args):
         self._init_players()
