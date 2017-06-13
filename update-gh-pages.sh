@@ -9,5 +9,5 @@ echo "$HTML_CONTENT" > index.html
 git add index.html
 git commit -m "Updated stats"
 
-#git push origin gh-pages
+git push origin gh-pages
 git checkout -
