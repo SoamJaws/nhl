@@ -1,15 +1,14 @@
 #!/usr/bin/env bash
 
-git fetch --all
 git pull --all
 
-git checkout gh-pages
-git rebase master
-
 ./nhl html > index.html
+git stash
+git checkout gh-pages
+git stash pop
 
 git add index.html
-git commit -m "Updated stats gh-pages"
+git commit -m "Updated stats"
 
-git push origin gh-pages
+#git push origin gh-pages
 git checkout -
