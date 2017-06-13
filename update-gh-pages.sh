@@ -19,5 +19,5 @@ git remote add origin https://${GH_TOKEN}@github.com/SoamJaws/nhl.git
 #add, commit and push files
 git add -f :/
 git commit -m "Travis build $TRAVIS_BUILD_NUMBER pushed to gh-pages"
-git pull -r
+git pull -r origin gh-pages
 git push -fq origin gh-pages > /dev/null
