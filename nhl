@@ -192,6 +192,7 @@ The most commonly used nhl commands are:
                     home_player.l += 1
 
     def _set_widths(self):
+        self.pos_w    = max(1, len(str(len(self.players))))
         self.player_w = max([ len(p.name) for p in self.players ])
         self.wlr_w    = max(2, max([ len("%.2f" % round(p.wlr, 2)) for p in self.players ]))
         self.gp_w     = max(2, max([ len(str(p.gp))   for p in self.players ]))
@@ -201,10 +202,11 @@ The most commonly used nhl commands are:
         self.gf_w     = max(2, max([ len(str(p.gf))   for p in self.players ]))
         self.ga_w     = max(2, max([ len(str(p.ga))   for p in self.players ]))
         self.diff_w   = max(4, max([ len(str(p.diff)) for p in self.players ]))
-        self.total_w  = self.player_w + self.wlr_w + self.gp_w + self.w_w + self.l_w + self.ot_w + self.gf_w + self.ga_w + self.diff_w + 26
+        self.total_w  = self.pos_w + self.player_w + self.wlr_w + self.gp_w + self.w_w + self.l_w + self.ot_w + self.gf_w + self.ga_w + self.diff_w + 29
 
     def _get_filled_line(self, c):
-        return self.format_string_line % ( c * self.player_w
+        return self.format_string_line % ( c * self.pos_w
+                                         , c * self.player_w
                                          , c * self.wlr_w
                                          , c * self.gp_w
                                          , c * self.w_w
@@ -220,7 +222,8 @@ The most commonly used nhl commands are:
         rows.append(self._get_filled_line("-"))
         rows.append("|" + self.season.replace("_", " ").center(self.total_w) + "|")
         rows.append(self._get_filled_line("-"))
-        rows.append(self.format_string_row % ( "Player"
+        rows.append(self.format_string_row % ( "#"
+                                             , "Player"
                                              , "WLR"
                                              , "GP"
                                              , "W"
@@ -236,16 +239,17 @@ The most commonly used nhl commands are:
     def _get_rows(self):
         self._set_widths()
 
-        self.format_string_row = (("| %%-%ds | %%-%ds " + "| %%-%ds " * 7 + "|")) % ( self.player_w
-                                                                                    , self.wlr_w
-                                                                                    , self.gp_w
-                                                                                    , self.w_w
-                                                                                    , self.l_w
-                                                                                    , self.ot_w
-                                                                                    , self.gf_w
-                                                                                    , self.ga_w
-                                                                                    , self.diff_w
-                                                                                    )
+        self.format_string_row = (("| %%-%ds " + "| %%-%ds " * 9 + "|")) % ( self.pos_w
+                                                                           , self.player_w
+                                                                           , self.wlr_w
+                                                                           , self.gp_w
+                                                                           , self.w_w
+                                                                           , self.l_w
+                                                                           , self.ot_w
+                                                                           , self.gf_w
+                                                                           , self.ga_w
+                                                                           , self.diff_w
+                                                                           )
         self.format_string_line = ("|" + self.format_string_row[1:-1].replace(" ", "-").replace("|", "-") + "|")
 
         rows = []
@@ -254,7 +258,8 @@ The most commonly used nhl commands are:
         position = 0
         for player in self.players:
             position += 1
-            rows.append(self.format_string_row % ( player.name
+            rows.append(self.format_string_row % ( position
+                                                 , player.name
                                                  , "%.2f" % player.wlr
                                                  , player.gp
                                                  , player.w
