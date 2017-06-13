@@ -2,10 +2,9 @@
 
 git pull --all
 
-./nhl html > index.html
-git stash
+HTML_CONTENT=$(./nhl html)
 git checkout gh-pages
-git stash pop
+echo "$HTML_CONTENT" > index.html
 
 git add index.html
 git commit -m "Updated stats"
