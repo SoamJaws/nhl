@@ -22,4 +22,4 @@ cat index.html
 git add index.html
 git commit -m "Travis build $TRAVIS_BUILD_NUMBER pushed to gh-pages"
 git show HEAD
-#git push -fq origin HEAD:gh-pages > /dev/null
+git push -fq origin HEAD:gh-pages > /dev/null
