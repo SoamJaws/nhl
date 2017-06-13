@@ -8,17 +8,15 @@ git config --global user.email "travis@travis-ci.org"
 git config --global user.name "Travis"
 
 #using token clone gh-pages branch
-git clone --quiet --branch=gh-pages https://${GH_TOKEN}@github.com/SoamJaws/nhl.git > /dev/null
+git clone --quiet https://${GH_TOKEN}@github.com/SoamJaws/nhl.git > /dev/null
 
 #go into directory and copy data we're interested in to that directory
 cd nhl
 git remote rm origin
 git remote add origin https://${GH_TOKEN}@github.com/SoamJaws/nhl.git
 ./nhl stats > index.html
-echo index.html
 
 #add, commit and push files
 git add index.html
 git commit -m "Travis build $TRAVIS_BUILD_NUMBER pushed to gh-pages"
-git pull -r origin gh-pages
-git push -fq origin gh-pages > /dev/null
+git push -fq origin HEAD:gh-pages > /dev/null
