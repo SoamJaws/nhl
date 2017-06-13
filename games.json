@@ -1,0 +1,88 @@
+{
+    "2017_Jun": [
+        {
+            "home": "JONAS",
+            "away": "JOHAN3",
+            "OT": false,
+            "JONAS": 3,
+            "JOHAN3": 2
+        },
+        {
+            "JONATAN": 1,
+            "home": "JONATAN",
+            "away": "JONAS",
+            "OT": false,
+            "JONAS": 0
+        },
+        {
+            "JONATAN": 4,
+            "home": "JONATAN",
+            "away": "JOHAN3",
+            "OT": false,
+            "JOHAN3": 6
+        },
+        {
+            "home": "JONAS",
+            "away": "JOHAN3",
+            "OT": false,
+            "JONAS": 3,
+            "JOHAN3": 6
+        },
+        {
+            "JOHAN4": 0,
+            "home": "JOHAN3",
+            "away": "JOHAN4",
+            "OT": false,
+            "JOHAN3": 1
+        },
+        {
+            "JONATAN": 3,
+            "home": "JONATAN",
+            "away": "JONAS",
+            "OT": false,
+            "JONAS": 2
+        },
+        {
+            "home": "JONAS",
+            "away": "JOHAN3",
+            "OT": false,
+            "JONAS": 3,
+            "JOHAN3": 2
+        },
+        {
+            "home": "JONAS",
+            "away": "JOHAN3",
+            "OT": false,
+            "JONAS": 2,
+            "JOHAN3": 1
+        },
+        {
+            "JONATAN": 1,
+            "home": "JONATAN",
+            "away": "JONAS",
+            "OT": true,
+            "JONAS": 2
+        },
+        {
+            "JONATAN": 0,
+            "home": "JONATAN",
+            "away": "JONAS",
+            "OT": false,
+            "JONAS": 5
+        },
+        {
+            "home": "JONAS",
+            "away": "JOHAN3",
+            "OT": false,
+            "JONAS": 2,
+            "JOHAN3": 0
+        },
+        {
+            "JONATAN": 3,
+            "home": "JONATAN",
+            "away": "JOHAN3",
+            "OT": false,
+            "JOHAN3": 2
+        }
+    ]
+}

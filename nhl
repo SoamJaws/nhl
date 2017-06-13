@@ -1,0 +1,304 @@
+#!/usr/bin/env python
+
+import argparse
+import sys
+import os
+import operator
+import json
+from datetime import date
+import calendar
+
+def nonnegative(x):
+    x = int(x)
+    if x < 0:
+        raise argparse.ArgumentTypeError("Negative integer")
+    return x
+
+
+class Player:
+
+    def __init__(self, name):
+        self.name = name
+        self.gp = 0
+        self.w = 0
+        self.l = 0
+        self.ot = 0
+        self.gf = 0
+        self.ga = 0
+        self.match_counts = {}
+
+    def __cmp__(self, other):
+        for prop in [ "wlr" , "diff" , "gp" , "ot" ]:
+            result = cmp(getattr(self, prop), getattr(other, prop))
+            if result != 0:
+                return result
+        return 0
+
+    @property
+    def wlr(self):
+        losses = self.l + self.ot
+        return self.w/float(losses) if losses > 0 else 10.0
+
+    @property
+    def diff(self):
+        return self.gf - self.ga
+
+
+class NHL:
+
+    def __init__(self):
+        today = date.today()
+        self.games_file = "games.json" 
+        self.season = "%d_%s" % (today.year, calendar.month_abbr[today.month])
+
+    def _parse_args(self):
+        parser = argparse.ArgumentParser(
+        description='Command line tool for managing nhl statistics',
+        usage='''nhl <command> [<args>]
+
+The most commonly used nhl commands are:
+   add     Add a game entry
+   suggest Get a suggestion of who you should challenge
+   stats   Print the current standings
+''')
+
+        subparsers = parser.add_subparsers(help='Subcommand to run', dest='command')
+
+        add_parser = subparsers.add_parser('add',
+            description='Add a game entry',
+            usage='''nhl add <home> <away> <home_score> <away_score> [-o|--over-time]''')
+        add_parser.add_argument('home', type=str.upper, help='home player')
+        add_parser.add_argument('away', type=str.upper, help='away player')
+        add_parser.add_argument('home_score', type=nonnegative, help='score of the home player')
+        add_parser.add_argument('away_score', type=nonnegative, help='score of the away player')
+        add_parser.add_argument('-o', '--overtime', action='store_true', help='specify if the game was finished in overtime')
+
+        suggest_parser = subparsers.add_parser('suggest')
+        suggest_parser.add_argument('player', help='your player name')
+        suggest_parser.add_argument('-e', '--exclude', nargs='*', default=[], help='a list of players to exclude from the match suggestions')
+
+        stats_parser = subparsers.add_parser('stats')
+
+        html_parser = subparsers.add_parser('html')
+
+        return parser.parse_args()
+
+    def run_command(self):
+        args = self._parse_args()
+        getattr(self, args.command)(args)
+
+    def load(self):
+        if os.path.exists(self.games_file):
+            with open(self.games_file) as data_file:
+                    self.data = json.load(data_file)
+        else:
+            self.data = []
+
+    def save(self):
+        with open(self.games_file, 'w') as data_file:
+            json.dump(self.data, data_file, indent=4, separators=(',', ': '))
+
+    def add(self, args):
+        if not self.season in self.data:
+            self.data[self.season] = []
+        self.data[self.season].append({ "home"    : args.home
+                                      , "away"    : args.away
+                                      , args.home : args.home_score
+                                      , args.away : args.away_score
+                                      , "OT"      : args.overtime
+                                      })
+
+        overtime_print = ", OT" if args.overtime else ""
+        print "Successfully added game \"%s @ %s: %d-%d%s\"" % ( args.away
+                                                               , args.home
+                                                               , args.away_score
+                                                               , args.home_score
+                                                               , overtime_print
+                                                               )
+
+    def suggest(self, args):
+        self._init_players()
+
+        for player_name in args.exclude:
+            if player_name in self.players:
+                del self.players[player_name]
+
+            for pn, player in self.players.iteritems():
+                if player_name in self.match_count:
+                    del self.match_count[player_name]
+
+        player = self.players[args.player]
+        least_played_player = min(player.match_counts.iteritems(), key=operator.itemgetter(1))[0]
+        player_least_played_games = min(self.players.values(), key=operator.attrgetter('gp')).name
+        leader = max(self.players.values()).name
+
+        print "Least played player            - %s, %s" % (least_played_player, "away" if self.players[least_played_player] > player else "home")
+        print "Player with least played games - %s, %s" % (player_least_played_games, "away" if self.players[player_least_played_games] > player else "home")
+        print "Season leader                  - %s, away" % leader
+
+    def _init_players(self):
+        # "GP"   : Games played
+        # "WLR"  : Win/lose ratio
+        # "W"    : Wins
+        # "L"    : Losses
+        # "OT"   : OT/Shootout losses
+        # "GF"   : Goals for
+        # "GA"   : Goals against
+        # "DIFF" : Goal difference
+        self.players = {}
+        for entry in self.data[self.season]:
+            home = entry["home"]
+            away = entry["away"]
+            home_score = entry[home]
+            away_score = entry[away]
+            OT = entry["OT"]
+
+            if not home in self.players:
+                self.players[home] = Player(home)
+            if not away in self.players:
+                self.players[away] = Player(away)
+
+            home_player = self.players[home]
+            away_player = self.players[away]
+
+            home_player.gp += 1
+            home_player.gf += home_score
+            home_player.ga += away_score
+
+            away_player.gp += 1
+            away_player.gf += away_score
+            away_player.ga += home_score
+
+            if not away in home_player.match_counts:
+                home_player.match_counts[away] = 0
+            else:
+                home_player.match_counts[away] += 1
+            if not home in away_player.match_counts:
+                away_player.match_counts[home] = 0
+            else:
+                away_player.match_counts[home] += 1
+
+            if home_score > away_score:
+                home_player.w += 1
+                if OT:
+                    away_player.ot += 1
+                else:
+                    away_player.l += 1
+            elif home_score < away_score:
+                away_player.w += 1
+                if OT:
+                    home_player.ot += 1
+                else:
+                    home_player.l += 1
+
+    def _set_widths(self):
+        self.pos_w    = max(1, len(str(len(self.players))))
+        self.player_w = max([ len(p.name) for p in self.players ])
+        self.wlr_w    = max(2, max([ len("%.2f" % round(p.wlr, 2)) for p in self.players ]))
+        self.gp_w     = max(2, max([ len(str(p.gp))   for p in self.players ]))
+        self.w_w      = max(1, max([ len(str(p.w))    for p in self.players ]))
+        self.l_w      = max(1, max([ len(str(p.l))    for p in self.players ]))
+        self.ot_w     = max(2, max([ len(str(p.ot))   for p in self.players ]))
+        self.gf_w     = max(2, max([ len(str(p.gf))   for p in self.players ]))
+        self.ga_w     = max(2, max([ len(str(p.ga))   for p in self.players ]))
+        self.diff_w   = max(4, max([ len(str(p.diff)) for p in self.players ]))
+        self.total_w  = self.pos_w + self.player_w + self.wlr_w + self.gp_w + self.w_w + self.l_w + self.ot_w + self.gf_w + self.ga_w + self.diff_w + 29
+
+    def _get_filled_line(self, c):
+        return self.format_string_line % ( c * self.pos_w
+                                         , c * self.player_w
+                                         , c * self.wlr_w
+                                         , c * self.gp_w
+                                         , c * self.w_w
+                                         , c * self.l_w
+                                         , c * self.ot_w
+                                         , c * self.gf_w
+                                         , c * self.ga_w
+                                         , c * self.diff_w
+                                         )
+
+    def _get_header(self):
+        rows = []
+        rows.append(self._get_filled_line("-"))
+        rows.append("|" + self.season.replace("_", " ").center(self.total_w) + "|")
+        rows.append(self._get_filled_line("-"))
+        rows.append(self.format_string_row % ( "#"
+                                             , "Player"
+                                             , "WLR"
+                                             , "GP"
+                                             , "W"
+                                             , "L"
+                                             , "OT"
+                                             , "GF"
+                                             , "GA"
+                                             , "DIFF"
+                                             ))
+        rows.append(self._get_filled_line("-"))
+        return rows
+
+    def _get_rows(self):
+        self._set_widths()
+
+        self.format_string_row = (("| %%-%ds " + "| %%-%ds " * 9 + "|")) % ( self.pos_w
+                                                                           , self.player_w
+                                                                           , self.wlr_w
+                                                                           , self.gp_w
+                                                                           , self.w_w
+                                                                           , self.l_w
+                                                                           , self.ot_w
+                                                                           , self.gf_w
+                                                                           , self.ga_w
+                                                                           , self.diff_w
+                                                                           )
+        self.format_string_line = ("|" + self.format_string_row[1:-1].replace(" ", "-").replace("|", "-") + "|")
+
+        rows = []
+        rows.extend(self._get_header())
+
+        position = 0
+        for player in self.players:
+            position += 1
+            rows.append(self.format_string_row % ( position
+                                                 , player.name
+                                                 , "%.2f" % player.wlr
+                                                 , player.gp
+                                                 , player.w
+                                                 , player.l
+                                                 , player.ot
+                                                 , player.gf
+                                                 , player.ga
+                                                 , player.diff
+                                                 ))
+
+        rows.append(self._get_filled_line("-"))
+        return rows
+
+    def _print_rows(self):
+        for row in self._get_rows():
+            print row
+
+    def stats(self, args):
+        self._init_players()
+        self.players = list(self.players.values())
+        self.players.sort(reverse=True)
+        self._print_rows()
+
+    def html(self, args):
+        self._init_players()
+        self.players = list(self.players.values())
+        self.players.sort(reverse=True)
+        print "<!DOCTYPE html>"
+        print "<html>"
+        print "<head><title>NHL STEGEN 3.0</title><link rel=\"stylesheet\" href=\"styles.css\"></head>"
+        print "<body>"
+        for row in self._get_rows():
+            print "<pre>%s</pre>" % row
+        print "<body>"
+        print "<html>"
+
+
+if __name__ == '__main__':
+    nhl = NHL()
+    nhl.load()
+    nhl.run_command()
+    nhl.save()
