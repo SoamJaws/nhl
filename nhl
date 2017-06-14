@@ -291,10 +291,39 @@ The most commonly used nhl commands are:
         print "<html>"
         print "<head><title>NHL STEGEN 3.0</title><link rel=\"stylesheet\" href=\"styles.css\"></head>"
         print "<body>"
-        for row in self._get_rows():
-            print "<pre>%s</pre>" % row
-        print "<body>"
-        print "<html>"
+        print "<table>"
+        print "<caption>%s</caption>" % self.season.replace("_", "")
+        print "<tr class=\"header\">"
+        print "<th>#</th>"
+        print "<th>Player</th>"
+        print "<th>WLR</th>"
+        print "<th>GP</th>"
+        print "<th>W</th>"
+        print "<th>L</th>"
+        print "<th>OT</th>"
+        print "<th>GF</th>"
+        print "<th>GA</th>"
+        print "<th>DIFF</th>"
+        print "</tr>"
+
+        position = 0
+        for player in  self.players:
+            position += 1
+            print "<tr class=\"player\">"
+            print "<th>%d</th>"   % position
+            print "<th>%s</th>"   % player.name
+            print "<th>%.2f</th>" % player.wlr
+            print "<th>%d</th>"   % player.gp
+            print "<th>%d</th>"   % player.w
+            print "<th>%d</th>"   % player.l
+            print "<th>%d</th>"   % player.ot
+            print "<th>%d</th>"   % player.gf
+            print "<th>%d</th>"   % player.ga
+            print "<th>%d</th>"   % player.diff
+            print "</tr>"
+        print "</table>"
+        print "</body>"
+        print "</html>"
 
 
 if __name__ == '__main__':
