@@ -4,6 +4,13 @@ table {
     width: 640px;
 }
 
+caption { 
+    font: 22px/28px Verdana, Arial, Helvetica, sans-serif;
+    display: table-caption;
+    text-align: center;
+    font-weight: bold;
+}
+
 th {
     padding: 0 1em;
     text-align: left;

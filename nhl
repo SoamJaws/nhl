@@ -220,7 +220,7 @@ The most commonly used nhl commands are:
     def _get_header(self):
         rows = []
         rows.append(self._get_filled_line("-"))
-        rows.append("|" + self.season.replace("_", " ").center(self.total_w) + "|")
+        rows.append("|" + self.season.replace("_", " ").upper().center(self.total_w) + "|")
         rows.append(self._get_filled_line("-"))
         rows.append(self.format_string_row % ( "#"
                                              , "Player"
@@ -292,7 +292,7 @@ The most commonly used nhl commands are:
         print "<head><title>NHL STEGEN 3.0</title><link rel=\"stylesheet\" href=\"styles.css\"></head>"
         print "<body>"
         print "<table>"
-        print "<caption>%s</caption>" % self.season.replace("_", "")
+        print "<caption>%s</caption>" % self.season.replace("_", " ").upper()
         print "<tr class=\"header\">"
         print "<th>#</th>"
         print "<th>Player</th>"
