@@ -1,3 +1,11 @@
+html, body {
+    width: 100%;
+}
+
+table {
+    margin: 0 auto;
+}
+
 table {
     font: 22px/28px Verdana, Arial, Helvetica, sans-serif;
     border-collapse: collapse;
