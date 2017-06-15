@@ -283,14 +283,7 @@ The most commonly used nhl commands are:
         self.players.sort(reverse=True)
         self._print_rows()
 
-    def html(self, args):
-        self._init_players()
-        self.players = list(self.players.values())
-        self.players.sort(reverse=True)
-        print "<!DOCTYPE html>"
-        print "<html>"
-        print "<head><title>NHL STEGEN 3.0</title><link rel=\"stylesheet\" href=\"styles.css\"></head>"
-        print "<body>"
+    def _print_stats_html(self):
         print "<table>"
         print "<caption>%s</caption>" % self.season.replace("_", " ").upper()
         print "<tr class=\"header\">"
@@ -322,6 +315,16 @@ The most commonly used nhl commands are:
             print "<th>%d</th>"   % player.diff
             print "</tr>"
         print "</table>"
+
+    def html(self, args):
+        self._init_players()
+        self.players = list(self.players.values())
+        self.players.sort(reverse=True)
+        print "<!DOCTYPE html>"
+        print "<html>"
+        print "<head><title>NHL STEGEN 3.0</title><link rel=\"stylesheet\" href=\"styles.css\"></head>"
+        print "<body>"
+        self._print_stats_html()
         print "</body>"
         print "</html>"
 
