@@ -36,8 +36,8 @@ class Player:
 
     @property
     def wlr(self):
-        losses = self.l + self.ot
-        return self.w/float(losses) if losses > 0 else 10.0
+        wins = self.w + self.ot * 0.5
+        return wins/float(self.l) if self.l > 0 else float('inf')
 
     @property
     def diff(self):
@@ -141,7 +141,7 @@ The most commonly used nhl commands are:
         # "WLR"  : Win/lose ratio
         # "W"    : Wins
         # "L"    : Losses
-        # "OT"   : OT/Shootout losses
+        # "OT"   : OT/Shootout wins
         # "GF"   : Goals for
         # "GA"   : Goals against
         # "DIFF" : Goal difference
@@ -179,17 +179,17 @@ The most commonly used nhl commands are:
                 away_player.match_counts[home] += 1
 
             if home_score > away_score:
-                home_player.w += 1
-                if OT:
-                    away_player.ot += 1
-                else:
-                    away_player.l += 1
-            elif home_score < away_score:
-                away_player.w += 1
+                away_player.l += 1
                 if OT:
                     home_player.ot += 1
                 else:
-                    home_player.l += 1
+                    home_player.w += 1
+            elif home_score < away_score:
+                home_player.l += 1
+                if OT:
+                    away_player.ot += 1
+                else:
+                    away_player.w += 1
 
     def _set_widths(self):
         self.pos_w    = max(1, len(str(len(self.players))))
