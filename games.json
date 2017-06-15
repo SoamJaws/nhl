@@ -125,6 +125,13 @@
             "away": "JOHAN3",
             "OT": false,
             "JOHAN3": 1
+        },
+        {
+            "JONATAN": 4,
+            "home": "JONATAN",
+            "away": "JOHAN3",
+            "OT": true,
+            "JOHAN3": 3
         }
     ]
 }
