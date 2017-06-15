@@ -115,21 +115,27 @@ The most commonly used nhl commands are:
                                                                , overtime_print
                                                                )
 
-    def suggest(self, args):
-        self._init_players()
-
-        for player_name in args.exclude:
+    def _suggest_matches(self, player, exclude):
+        for player_name in exclude:
             if player_name in self.players:
                 del self.players[player_name]
 
-            for pn, player in self.players.iteritems():
-                if player_name in player.match_count:
-                    del player.match_count[player_name]
+            for pn, p in self.players.iteritems():
+                if player_name in p.match_count:
+                    del p.match_count[player_name]
 
-        player = self.players[args.player]
         least_played_player = min(player.match_counts.iteritems(), key=operator.itemgetter(1))[0]
         player_least_played_games = min(self.players.values(), key=operator.attrgetter('gp')).name
         leader = max(self.players.values()).name
+
+        return least_played_player, player_least_played_games, leader
+
+    def suggest(self, args):
+        self._init_players()
+
+        player = self.players[args.player]
+        least_played_player, player_least_played_games, leader = self._suggest_matches(player, args.exclude)
+
 
         print "Least played player            - %s, %s" % (least_played_player, "away" if self.players[least_played_player] > player else "home")
         print "Player with least played games - %s, %s" % (player_least_played_games, "away" if self.players[player_least_played_games] > player else "home")
