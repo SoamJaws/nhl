@@ -43,7 +43,6 @@ class Player:
     def diff(self):
         return self.gf - self.ga
 
-
 class NHL:
 
     def __init__(self):
@@ -124,8 +123,8 @@ The most commonly used nhl commands are:
                 del self.players[player_name]
 
             for pn, player in self.players.iteritems():
-                if player_name in self.match_count:
-                    del self.match_count[player_name]
+                if player_name in player.match_count:
+                    del player.match_count[player_name]
 
         player = self.players[args.player]
         least_played_player = min(player.match_counts.iteritems(), key=operator.itemgetter(1))[0]
@@ -170,11 +169,11 @@ The most commonly used nhl commands are:
             away_player.ga += home_score
 
             if not away in home_player.match_counts:
-                home_player.match_counts[away] = 0
+                home_player.match_counts[away] = 1
             else:
                 home_player.match_counts[away] += 1
             if not home in away_player.match_counts:
-                away_player.match_counts[home] = 0
+                away_player.match_counts[home] = 1
             else:
                 away_player.match_counts[home] += 1
 
@@ -190,6 +189,10 @@ The most commonly used nhl commands are:
                     away_player.ot += 1
                 else:
                     away_player.w += 1
+        for name1, player in self.players.iteritems():
+            for name2 in self.players:
+                if not (name1 == name2 or name2 in player.match_counts):
+                    player.match_counts[name2] = 0
 
     def _set_widths(self):
         self.pos_w    = max(1, len(str(len(self.players))))
@@ -283,7 +286,7 @@ The most commonly used nhl commands are:
         self.players.sort(reverse=True)
         self._print_rows()
 
-    def _print_stats_html(self):
+    def _print_stats_html_table(self):
         print "<table>"
         print "<caption>%s</caption>" % self.season.replace("_", " ").upper()
         print "<tr class=\"header\">"
@@ -316,6 +319,28 @@ The most commonly used nhl commands are:
             print "</tr>"
         print "</table>"
 
+    def _print_match_count_html_table(self):
+        print "<table>"
+        print "<caption>GAMES PLAYED</caption>"
+        print "<tr class=\"header\">"
+        print "<th>Player</th>"
+        print "<th>Player</th>"
+        print "<th>Games played</th>"
+        print "</tr>"
+
+        printed = {}
+        for player in self.players:
+            printed[player.name] = []
+            for away_player, count in player.match_counts.iteritems():
+                if away_player in printed and not player.name in printed[away_player]:
+                    print "<tr class=\"player\">"
+                    print "<th>%s</th>" % player.name
+                    print "<th>%s</th>" % away_player
+                    print "<th>%d</th>" % count
+                    print "</tr>"
+                    printed[player.name].append(away_player)
+        print "</table>"
+
     def html(self, args):
         self._init_players()
         self.players = list(self.players.values())
@@ -324,7 +349,9 @@ The most commonly used nhl commands are:
         print "<html>"
         print "<head><title>NHL STEGEN 3.0</title><link rel=\"stylesheet\" href=\"styles.css\"></head>"
         print "<body>"
-        self._print_stats_html()
+        self._print_stats_html_table()
+        print "<br>"
+        self._print_match_count_html_table()
         print "</body>"
         print "</html>"
 
