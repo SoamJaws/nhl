@@ -117,28 +117,28 @@ The most commonly used nhl commands are:
 
     def _suggest_matches(self, player, exclude):
         for player_name in exclude:
-            if player_name in self.players:
-                del self.players[player_name]
+            if player_name in self.player_dict:
+                del self.player_dict[player_name]
 
-            for pn, p in self.players.iteritems():
+            for pn, p in self.player_dict.iteritems():
                 if player_name in p.match_count:
                     del p.match_count[player_name]
 
         least_played_player = min(player.match_counts.iteritems(), key=operator.itemgetter(1))[0]
-        player_least_played_games = min(self.players.values(), key=operator.attrgetter('gp')).name
-        leader = max(self.players.values()).name
+        player_least_played_games = min(self.player_dict.values(), key=operator.attrgetter('gp')).name
+        leader = max(self.player_dict.values()).name
 
         return least_played_player, player_least_played_games, leader
 
     def suggest(self, args):
         self._init_players()
 
-        player = self.players[args.player]
+        player = self.player_dict[args.player]
         least_played_player, player_least_played_games, leader = self._suggest_matches(player, args.exclude)
 
 
-        print "Least played player            - %s, %s" % (least_played_player, "away" if self.players[least_played_player] > player else "home")
-        print "Player with least played games - %s, %s" % (player_least_played_games, "away" if self.players[player_least_played_games] > player else "home")
+        print "Least played player            - %s, %s" % (least_played_player, "away" if self.player_dict[least_played_player] > player else "home")
+        print "Player with least played games - %s, %s" % (player_least_played_games, "away" if self.player_dict[player_least_played_games] > player else "home")
         print "Season leader                  - %s, away" % leader
 
     def _init_players(self):
@@ -150,7 +150,7 @@ The most commonly used nhl commands are:
         # "GF"   : Goals for
         # "GA"   : Goals against
         # "DIFF" : Goal difference
-        self.players = {}
+        self.player_dict = {}
         for entry in self.data[self.season]:
             home = entry["home"]
             away = entry["away"]
@@ -158,13 +158,13 @@ The most commonly used nhl commands are:
             away_score = entry[away]
             OT = entry["OT"]
 
-            if not home in self.players:
-                self.players[home] = Player(home)
-            if not away in self.players:
-                self.players[away] = Player(away)
+            if not home in self.player_dict:
+                self.player_dict[home] = Player(home)
+            if not away in self.player_dict:
+                self.player_dict[away] = Player(away)
 
-            home_player = self.players[home]
-            away_player = self.players[away]
+            home_player = self.player_dict[home]
+            away_player = self.player_dict[away]
 
             home_player.gp += 1
             home_player.gf += home_score
@@ -195,22 +195,24 @@ The most commonly used nhl commands are:
                     away_player.ot += 1
                 else:
                     away_player.w += 1
-        for name1, player in self.players.iteritems():
-            for name2 in self.players:
+        for name1, player in self.player_dict.iteritems():
+            for name2 in self.player_dict:
                 if not (name1 == name2 or name2 in player.match_counts):
                     player.match_counts[name2] = 0
+        self.player_list = list(self.player_dict.values())
+        self.player_list.sort(reverse=True)
 
     def _set_widths(self):
-        self.pos_w    = max(1, len(str(len(self.players))))
-        self.player_w = max([ len(p.name) for p in self.players ])
-        self.wlr_w    = max(2, max([ len("%.2f" % round(p.wlr, 2)) for p in self.players ]))
-        self.gp_w     = max(2, max([ len(str(p.gp))   for p in self.players ]))
-        self.w_w      = max(1, max([ len(str(p.w))    for p in self.players ]))
-        self.l_w      = max(1, max([ len(str(p.l))    for p in self.players ]))
-        self.ot_w     = max(2, max([ len(str(p.ot))   for p in self.players ]))
-        self.gf_w     = max(2, max([ len(str(p.gf))   for p in self.players ]))
-        self.ga_w     = max(2, max([ len(str(p.ga))   for p in self.players ]))
-        self.diff_w   = max(4, max([ len(str(p.diff)) for p in self.players ]))
+        self.pos_w    = max(1, len(str(len(self.player_list))))
+        self.player_w = max([ len(p.name) for p in self.player_list ])
+        self.wlr_w    = max(2, max([ len("%.2f" % round(p.wlr, 2)) for p in self.player_list ]))
+        self.gp_w     = max(2, max([ len(str(p.gp))   for p in self.player_list ]))
+        self.w_w      = max(1, max([ len(str(p.w))    for p in self.player_list ]))
+        self.l_w      = max(1, max([ len(str(p.l))    for p in self.player_list ]))
+        self.ot_w     = max(2, max([ len(str(p.ot))   for p in self.player_list ]))
+        self.gf_w     = max(2, max([ len(str(p.gf))   for p in self.player_list ]))
+        self.ga_w     = max(2, max([ len(str(p.ga))   for p in self.player_list ]))
+        self.diff_w   = max(4, max([ len(str(p.diff)) for p in self.player_list ]))
         self.total_w  = self.pos_w + self.player_w + self.wlr_w + self.gp_w + self.w_w + self.l_w + self.ot_w + self.gf_w + self.ga_w + self.diff_w + 29
 
     def _get_filled_line(self, c):
@@ -265,7 +267,7 @@ The most commonly used nhl commands are:
         rows.extend(self._get_header())
 
         position = 0
-        for player in self.players:
+        for player in self.player_list:
             position += 1
             rows.append(self.format_string_row % ( position
                                                  , player.name
@@ -288,8 +290,6 @@ The most commonly used nhl commands are:
 
     def stats(self, args):
         self._init_players()
-        self.players = list(self.players.values())
-        self.players.sort(reverse=True)
         self._print_rows()
 
     def _print_stats_html_table(self):
@@ -309,7 +309,7 @@ The most commonly used nhl commands are:
         print "</tr>"
 
         position = 0
-        for player in  self.players:
+        for player in self.player_list:
             position += 1
             print "<tr class=\"player\">"
             print "<th>%d</th>"   % position
@@ -335,7 +335,7 @@ The most commonly used nhl commands are:
         print "</tr>"
 
         printed = {}
-        for player in self.players:
+        for player in self.player_list:
             printed[player.name] = []
             for away_player, count in player.match_counts.iteritems():
                 if away_player in printed and not player.name in printed[away_player]:
@@ -347,10 +347,29 @@ The most commonly used nhl commands are:
                     printed[player.name].append(away_player)
         print "</table>"
 
+    def _print_suggestions_html_table(self):
+        print "<table>"
+        print "<caption>MATCH SUGGESTIONS</caption>"
+        print "<tr class=\"header\">"
+        print "<th>Player</th>"
+        print "<th>LPP</th>"
+        print "<th>LPG</th>"
+        print "<th>Leader</th>"
+        print "</tr>"
+
+        printed = {}
+        for player_name, player in self.player_dict.iteritems():
+            least_played_player, player_least_played_games, leader = self._suggest_matches(player, [])
+            print "<tr class=\"player\">"
+            print "<th>%s</th>" % player.name
+            print "<th>%s</th>" % least_played_player
+            print "<th>%s</th>" % player_least_played_games
+            print "<th>%s</th>" % leader
+            print "</tr>"
+        print "</table>"
+
     def html(self, args):
         self._init_players()
-        self.players = list(self.players.values())
-        self.players.sort(reverse=True)
         print "<!DOCTYPE html>"
         print "<html>"
         print "<head><title>NHL STEGEN 3.0</title><link rel=\"stylesheet\" href=\"styles.css\"></head>"
@@ -358,6 +377,8 @@ The most commonly used nhl commands are:
         self._print_stats_html_table()
         print "<br>"
         self._print_match_count_html_table()
+        print "<br>"
+        self._print_suggestions_html_table()
         print "</body>"
         print "</html>"
 
