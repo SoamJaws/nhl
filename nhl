@@ -1,12 +1,9 @@
 #!/usr/bin/env python
 
 import argparse
-import sys
-import os
 import operator
-import json
-from datetime import date
-import calendar
+
+from model import Model
 
 def nonnegative(x):
     x = int(x)
@@ -14,41 +11,10 @@ def nonnegative(x):
         raise argparse.ArgumentTypeError("Negative integer")
     return x
 
-
-class Player:
-
-    def __init__(self, name):
-        self.name = name
-        self.gp = 0
-        self.w = 0
-        self.l = 0
-        self.ot = 0
-        self.gf = 0
-        self.ga = 0
-        self.match_counts = {}
-
-    def __cmp__(self, other):
-        for prop in [ "wlr" , "diff" , "gp" , "ot" ]:
-            result = cmp(getattr(self, prop), getattr(other, prop))
-            if result != 0:
-                return result
-        return 0
-
-    @property
-    def wlr(self):
-        wins = self.w + self.ot * 0.5
-        return wins/float(self.l) if self.l > 0 else float('inf')
-
-    @property
-    def diff(self):
-        return self.gf - self.ga
-
 class NHL:
 
-    def __init__(self):
-        today = date.today()
-        self.games_file = "games.json" 
-        self.season = "%d_%s" % (today.year, calendar.month_abbr[today.month])
+    def __init__(self, model):
+        self.model = model
 
     def _parse_args(self):
         parser = argparse.ArgumentParser(
@@ -86,26 +52,8 @@ The most commonly used nhl commands are:
         args = self._parse_args()
         getattr(self, args.command)(args)
 
-    def load(self):
-        if os.path.exists(self.games_file):
-            with open(self.games_file) as data_file:
-                    self.data = json.load(data_file)
-        else:
-            self.data = []
-
-    def save(self):
-        with open(self.games_file, 'w') as data_file:
-            json.dump(self.data, data_file, indent=4, separators=(',', ': '))
-
     def add(self, args):
-        if not self.season in self.data:
-            self.data[self.season] = []
-        self.data[self.season].append({ "home"    : args.home
-                                      , "away"    : args.away
-                                      , args.home : args.home_score
-                                      , args.away : args.away_score
-                                      , "OT"      : args.overtime
-                                      })
+        model.add(args.home, args.away, args.home_score, args.away_score, args.overtime)
 
         overtime_print = ", OT" if args.overtime else ""
         print "Successfully added game \"%s @ %s: %d-%d%s\"" % ( args.away
@@ -117,102 +65,40 @@ The most commonly used nhl commands are:
 
     def _suggest_matches(self, player, exclude):
         for player_name in exclude:
-            if player_name in self.player_dict:
-                del self.player_dict[player_name]
+            if player_name in model.player_dict:
+                del model.player_dict[player_name]
 
-            for pn, p in self.player_dict.iteritems():
+            for pn, p in model.player_dict.iteritems():
                 if player_name in p.match_count:
                     del p.match_count[player_name]
 
         least_played_player = min(player.match_counts.iteritems(), key=operator.itemgetter(1))[0]
-        player_least_played_games = min(self.player_dict.values(), key=operator.attrgetter('gp')).name
-        leader = max(self.player_dict.values()).name
+        player_least_played_games = min(model.player_dict.values(), key=operator.attrgetter('gp')).name
+        leader = max(model.player_dict.values()).name
 
         return least_played_player, player_least_played_games, leader
 
     def suggest(self, args):
-        self._init_players()
-
-        player = self.player_dict[args.player]
+        player = model.player_dict[args.player]
         least_played_player, player_least_played_games, leader = self._suggest_matches(player, args.exclude)
 
 
-        print "Least played player            - %s, %s" % (least_played_player, "away" if self.player_dict[least_played_player] > player else "home")
-        print "Player with least played games - %s, %s" % (player_least_played_games, "away" if self.player_dict[player_least_played_games] > player else "home")
+        print "Least played player            - %s, %s" % (least_played_player, "away" if model.player_dict[least_played_player] > player else "home")
+        print "Player with least played games - %s, %s" % (player_least_played_games, "away" if model.player_dict[player_least_played_games] > player else "home")
         print "Season leader                  - %s, away" % leader
 
-    def _init_players(self):
-        # "GP"   : Games played
-        # "WLR"  : Win/lose ratio
-        # "W"    : Wins
-        # "L"    : Losses
-        # "OT"   : OT/Shootout wins
-        # "GF"   : Goals for
-        # "GA"   : Goals against
-        # "DIFF" : Goal difference
-        self.player_dict = {}
-        for entry in self.data[self.season]:
-            home = entry["home"]
-            away = entry["away"]
-            home_score = entry[home]
-            away_score = entry[away]
-            OT = entry["OT"]
-
-            if not home in self.player_dict:
-                self.player_dict[home] = Player(home)
-            if not away in self.player_dict:
-                self.player_dict[away] = Player(away)
-
-            home_player = self.player_dict[home]
-            away_player = self.player_dict[away]
-
-            home_player.gp += 1
-            home_player.gf += home_score
-            home_player.ga += away_score
-
-            away_player.gp += 1
-            away_player.gf += away_score
-            away_player.ga += home_score
-
-            if not away in home_player.match_counts:
-                home_player.match_counts[away] = 1
-            else:
-                home_player.match_counts[away] += 1
-            if not home in away_player.match_counts:
-                away_player.match_counts[home] = 1
-            else:
-                away_player.match_counts[home] += 1
-
-            if home_score > away_score:
-                away_player.l += 1
-                if OT:
-                    home_player.ot += 1
-                else:
-                    home_player.w += 1
-            elif home_score < away_score:
-                home_player.l += 1
-                if OT:
-                    away_player.ot += 1
-                else:
-                    away_player.w += 1
-        for name1, player in self.player_dict.iteritems():
-            for name2 in self.player_dict:
-                if not (name1 == name2 or name2 in player.match_counts):
-                    player.match_counts[name2] = 0
-        self.player_list = list(self.player_dict.values())
-        self.player_list.sort(reverse=True)
 
     def _set_widths(self):
-        self.pos_w    = max(1, len(str(len(self.player_list))))
-        self.player_w = max([ len(p.name) for p in self.player_list ])
-        self.wlr_w    = max(2, max([ len("%.2f" % round(p.wlr, 2)) for p in self.player_list ]))
-        self.gp_w     = max(2, max([ len(str(p.gp))   for p in self.player_list ]))
-        self.w_w      = max(1, max([ len(str(p.w))    for p in self.player_list ]))
-        self.l_w      = max(1, max([ len(str(p.l))    for p in self.player_list ]))
-        self.ot_w     = max(2, max([ len(str(p.ot))   for p in self.player_list ]))
-        self.gf_w     = max(2, max([ len(str(p.gf))   for p in self.player_list ]))
-        self.ga_w     = max(2, max([ len(str(p.ga))   for p in self.player_list ]))
-        self.diff_w   = max(4, max([ len(str(p.diff)) for p in self.player_list ]))
+        self.pos_w    = max(1, len(str(len(model.player_list))))
+        self.player_w = max([ len(p.name) for p in model.player_list ])
+        self.wlr_w    = max(2, max([ len("%.2f" % round(p.wlr, 2)) for p in model.player_list ]))
+        self.gp_w     = max(2, max([ len(str(p.gp))   for p in model.player_list ]))
+        self.w_w      = max(1, max([ len(str(p.w))    for p in model.player_list ]))
+        self.l_w      = max(1, max([ len(str(p.l))    for p in model.player_list ]))
+        self.ot_w     = max(2, max([ len(str(p.ot))   for p in model.player_list ]))
+        self.gf_w     = max(2, max([ len(str(p.gf))   for p in model.player_list ]))
+        self.ga_w     = max(2, max([ len(str(p.ga))   for p in model.player_list ]))
+        self.diff_w   = max(4, max([ len(str(p.diff)) for p in model.player_list ]))
         self.total_w  = self.pos_w + self.player_w + self.wlr_w + self.gp_w + self.w_w + self.l_w + self.ot_w + self.gf_w + self.ga_w + self.diff_w + 29
 
     def _get_filled_line(self, c):
@@ -231,7 +117,7 @@ The most commonly used nhl commands are:
     def _get_header(self):
         rows = []
         rows.append(self._get_filled_line("-"))
-        rows.append("|" + self.season.replace("_", " ").upper().center(self.total_w) + "|")
+        rows.append("|" + model.season.replace("_", " ").upper().center(self.total_w) + "|")
         rows.append(self._get_filled_line("-"))
         rows.append(self.format_string_row % ( "#"
                                              , "Player"
@@ -267,7 +153,7 @@ The most commonly used nhl commands are:
         rows.extend(self._get_header())
 
         position = 0
-        for player in self.player_list:
+        for player in model.player_list:
             position += 1
             rows.append(self.format_string_row % ( position
                                                  , player.name
@@ -289,12 +175,11 @@ The most commonly used nhl commands are:
             print row
 
     def stats(self, args):
-        self._init_players()
         self._print_rows()
 
     def _print_stats_html_table(self):
         print "<table>"
-        print "<caption>%s</caption>" % self.season.replace("_", " ").upper()
+        print "<caption>%s</caption>" % model.season.replace("_", " ").upper()
         print "<tr class=\"header\">"
         print "<th>#</th>"
         print "<th>Player</th>"
@@ -309,7 +194,7 @@ The most commonly used nhl commands are:
         print "</tr>"
 
         position = 0
-        for player in self.player_list:
+        for player in model.player_list:
             position += 1
             print "<tr class=\"player\">"
             print "<th>%d</th>"   % position
@@ -335,7 +220,7 @@ The most commonly used nhl commands are:
         print "</tr>"
 
         printed = {}
-        for player in self.player_list:
+        for player in model.player_list:
             printed[player.name] = []
             for away_player, count in player.match_counts.iteritems():
                 if away_player in printed and not player.name in printed[away_player]:
@@ -358,7 +243,7 @@ The most commonly used nhl commands are:
         print "</tr>"
 
         printed = {}
-        for player_name, player in self.player_dict.iteritems():
+        for player_name, player in model.player_dict.iteritems():
             least_played_player, player_least_played_games, leader = self._suggest_matches(player, [])
             print "<tr class=\"player\">"
             print "<th>%s</th>" % player.name
@@ -369,7 +254,6 @@ The most commonly used nhl commands are:
         print "</table>"
 
     def html(self, args):
-        self._init_players()
         print "<!DOCTYPE html>"
         print "<html>"
         print "<head><title>NHL STEGEN 3.0</title><link rel=\"stylesheet\" href=\"styles.css\"></head>"
@@ -384,7 +268,8 @@ The most commonly used nhl commands are:
 
 
 if __name__ == '__main__':
-    nhl = NHL()
-    nhl.load()
+    model = Model()
+    nhl = NHL(model)
+    model.load_players()
     nhl.run_command()
-    nhl.save()
+    model.save()
