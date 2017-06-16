@@ -84,3 +84,92 @@ class View:
     def print_stats(self):
         for row in self._get_rows():
             print row
+
+    def _print_stats_html_table(self):
+        print "<table>"
+        print "<caption>%s</caption>" % self.model.season.replace("_", " ").upper()
+        print "<tr class=\"header\">"
+        print "<th>#</th>"
+        print "<th>Player</th>"
+        print "<th style=\"cursor:pointer;\" title=\"Win loss ratio\">WLR</th>"
+        print "<th style=\"cursor:pointer;\" title=\"Games played\">GP</th>"
+        print "<th style=\"cursor:pointer;\" title=\"Wins\">W</th>"
+        print "<th style=\"cursor:pointer;\" title=\"Losses\">L</th>"
+        print "<th style=\"cursor:pointer;\" title=\"Overtime wins\">OT</th>"
+        print "<th style=\"cursor:pointer;\" title=\"Goals for\">GF</th>"
+        print "<th style=\"cursor:pointer;\" title=\"Goals against\">GA</th>"
+        print "<th style=\"cursor:pointer;\" title=\"Goal difference\">DIFF</th>"
+        print "</tr>"
+
+        position = 0
+        for player in self.model.player_list:
+            position += 1
+            print "<tr class=\"player\">"
+            print "<th>%d</th>"   % position
+            print "<th>%s</th>"   % player.name
+            print "<th>%.2f</th>" % player.wlr
+            print "<th>%d</th>"   % player.gp
+            print "<th>%d</th>"   % player.w
+            print "<th>%d</th>"   % player.l
+            print "<th>%d</th>"   % player.ot
+            print "<th>%d</th>"   % player.gf
+            print "<th>%d</th>"   % player.ga
+            print "<th>%d</th>"   % player.diff
+            print "</tr>"
+        print "</table>"
+
+    def _print_match_count_html_table(self):
+        print "<table>"
+        print "<caption>GAMES PLAYED</caption>"
+        print "<tr class=\"header\">"
+        print "<th>Player</th>"
+        print "<th>Player</th>"
+        print "<th>Games played</th>"
+        print "</tr>"
+
+        printed = {}
+        for player in self.model.player_list:
+            printed[player.name] = []
+            for away_player, count in player.match_counts.iteritems():
+                if away_player in printed and not player.name in printed[away_player]:
+                    print "<tr class=\"player\">"
+                    print "<th>%s</th>" % player.name
+                    print "<th>%s</th>" % away_player
+                    print "<th>%d</th>" % count
+                    print "</tr>"
+                    printed[player.name].append(away_player)
+        print "</table>"
+
+    def _print_suggestions_html_table(self):
+        print "<table>"
+        print "<caption>MATCH SUGGESTIONS</caption>"
+        print "<tr class=\"header\">"
+        print "<th>Player</th>"
+        print "<th style=\"cursor:pointer;\" title=\"Least played player\">LPP</th>"
+        print "<th style=\"cursor:pointer;\" title=\"Least played games\">LPG</th>"
+        print "<th>Leader</th>"
+        print "</tr>"
+
+        printed = {}
+        for player_name, player in self.model.player_dict.iteritems():
+            least_played_player, player_least_played_games, leader = self._suggest_matches(player, [])
+            print "<tr class=\"player\">"
+            print "<th>%s</th>" % player.name
+            print "<th>%s</th>" % least_played_player
+            print "<th>%s</th>" % player_least_played_games
+            print "<th>%s</th>" % leader
+            print "</tr>"
+        print "</table>"
+
+    def print_html(self):
+        print "<!DOCTYPE html>"
+        print "<html>"
+        print "<head><title>NHL STEGEN 3.0</title><link rel=\"stylesheet\" href=\"styles.css\"></head>"
+        print "<body>"
+        self._print_stats_html_table()
+        print "<br>"
+        self._print_match_count_html_table()
+        print "<br>"
+        self._print_suggestions_html_table()
+        print "</body>"
+        print "</html>"
