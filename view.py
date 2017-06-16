@@ -1,4 +1,4 @@
-class View:
+class ConsoleView:
 
     def __init__(self, model):
         self.model = model
@@ -85,7 +85,31 @@ class View:
         for row in self._get_rows():
             print row
 
-    def _print_stats_html_table(self):
+    def print_suggestions(self, player_name, excluded_players):
+        least_played_player = self.model.get_least_played_player(player_name, excluded_players)
+        player_least_played_games = self.model.get_player_least_played_games(excluded_players)
+        leader = self.model.get_leader(excluded_players)
+        player = self.model.get_player(player_name)
+
+        print "Least played player            - %s, %s" % (least_played_player.name, "away" if least_played_player > player else "home")
+        print "Player with least played games - %s, %s" % (player_least_played_games.name, "away" if player_least_played_games > player else "home")
+        print "Season leader                  - %s, away" % leader.name
+
+    def print_game_addition(self, home, away, home_score, away_score, overtime):
+        overtime_print = ", OT" if overtime else ""
+        print "Successfully added game \"%s @ %s: %d-%d%s\"" % ( away
+                                                               , home
+                                                               , away_score
+                                                               , home_score
+                                                               , overtime_print
+                                                               )
+
+class HtmlView():
+
+    def __init__(self, model):
+        self.model = model
+
+    def _print_stats_table(self):
         print "<table>"
         print "<caption>%s</caption>" % self.model.season.replace("_", " ").upper()
         print "<tr class=\"header\">"
@@ -118,7 +142,7 @@ class View:
             print "</tr>"
         print "</table>"
 
-    def _print_match_count_html_table(self):
+    def _print_match_count_table(self):
         print "<table>"
         print "<caption>GAMES PLAYED</caption>"
         print "<tr class=\"header\">"
@@ -140,7 +164,7 @@ class View:
                     printed[player.name].append(away_player)
         print "</table>"
 
-    def _print_suggestions_html_table(self):
+    def _print_suggestions_table(self):
         print "<table>"
         print "<caption>MATCH SUGGESTIONS</caption>"
         print "<tr class=\"header\">"
@@ -168,29 +192,10 @@ class View:
         print "<html>"
         print "<head><title>NHL STEGEN 3.0</title><link rel=\"stylesheet\" href=\"styles.css\"></head>"
         print "<body>"
-        self._print_stats_html_table()
+        self._print_stats_table()
         print "<br>"
-        self._print_match_count_html_table()
+        self._print_match_count_table()
         print "<br>"
-        self._print_suggestions_html_table()
+        self._print_suggestions_table()
         print "</body>"
         print "</html>"
-
-    def print_suggestions(self, player_name, excluded_players):
-        least_played_player = self.model.get_least_played_player(player_name, excluded_players)
-        player_least_played_games = self.model.get_player_least_played_games(excluded_players)
-        leader = self.model.get_leader(excluded_players)
-        player = self.model.get_player(player_name)
-
-        print "Least played player            - %s, %s" % (least_played_player.name, "away" if least_played_player > player else "home")
-        print "Player with least played games - %s, %s" % (player_least_played_games.name, "away" if player_least_played_games > player else "home")
-        print "Season leader                  - %s, away" % leader.name
-
-    def print_game_addition(self, home, away, home_score, away_score, overtime):
-        overtime_print = ", OT" if overtime else ""
-        print "Successfully added game \"%s @ %s: %d-%d%s\"" % ( away
-                                                               , home
-                                                               , away_score
-                                                               , home_score
-                                                               , overtime_print
-                                                               )

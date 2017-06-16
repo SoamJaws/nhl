@@ -3,7 +3,7 @@
 import argparse
 
 from model import Model
-from view import View
+from view import ConsoleView, HtmlView
 from control import Control
 
 def nonnegative(x):
@@ -47,7 +47,8 @@ The most commonly used nhl commands are:
 if __name__ == '__main__':
     args = parse_args()
     model = Model()
-    view = View(model)
-    control = Control(model, view)
+    console_view = ConsoleView(model)
+    html_view = HtmlView(model)
+    control = Control(model, console_view, html_view)
     control.run_command(args.command, args)
     model.save()
