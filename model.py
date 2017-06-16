@@ -45,8 +45,9 @@ class Model:
                     self.data = json.load(data_file)
         else:
             self.data = []
+        self._load_players()
 
-    def load_players(self):
+    def _load_players(self):
         # "GP"   : Games played
         # "WLR"  : Win/lose ratio
         # "W"    : Wins

@@ -68,7 +68,6 @@ The most commonly used nhl commands are:
 
 if __name__ == '__main__':
     model = Model()
-    model.load_players()
     view = View(model)
     nhl = NHL(model, view)
     nhl.run_command()
