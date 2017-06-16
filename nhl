@@ -4,6 +4,7 @@ import argparse
 
 from model import Model
 from view import View
+from control import Control
 
 def nonnegative(x):
     x = int(x)
@@ -11,16 +12,10 @@ def nonnegative(x):
         raise argparse.ArgumentTypeError("Negative integer")
     return x
 
-class NHL:
-
-    def __init__(self, model, view):
-        self.model = model
-        self.view = view
-
-    def _parse_args(self):
-        parser = argparse.ArgumentParser(
-        description='Command line tool for managing nhl statistics',
-        usage='''nhl <command> [<args>]
+def parse_args():
+    parser = argparse.ArgumentParser(
+    description='Command line tool for managing nhl statistics',
+    usage='''nhl <command> [<args>]
 
 The most commonly used nhl commands are:
    add     Add a game entry
@@ -28,47 +23,31 @@ The most commonly used nhl commands are:
    stats   Print the current standings
 ''')
 
-        subparsers = parser.add_subparsers(help='Subcommand to run', dest='command')
+    subparsers = parser.add_subparsers(help='Subcommand to run', dest='command')
 
-        add_parser = subparsers.add_parser('add',
-            description='Add a game entry',
-            usage='''nhl add <home> <away> <home_score> <away_score> [-o|--over-time]''')
-        add_parser.add_argument('home', type=str.upper, help='home player')
-        add_parser.add_argument('away', type=str.upper, help='away player')
-        add_parser.add_argument('home_score', type=nonnegative, help='score of the home player')
-        add_parser.add_argument('away_score', type=nonnegative, help='score of the away player')
-        add_parser.add_argument('-o', '--overtime', action='store_true', help='specify if the game was finished in overtime')
+    add_parser = subparsers.add_parser('add',
+        description='Add a game entry',
+        usage='''nhl add <home> <away> <home_score> <away_score> [-o|--over-time]''')
+    add_parser.add_argument('home', type=str.upper, help='home player')
+    add_parser.add_argument('away', type=str.upper, help='away player')
+    add_parser.add_argument('home_score', type=nonnegative, help='score of the home player')
+    add_parser.add_argument('away_score', type=nonnegative, help='score of the away player')
+    add_parser.add_argument('-o', '--overtime', action='store_true', help='specify if the game was finished in overtime')
 
-        suggest_parser = subparsers.add_parser('suggest')
-        suggest_parser.add_argument('player', help='your player name')
-        suggest_parser.add_argument('-e', '--exclude', nargs='*', default=[], help='a list of players to exclude from the match suggestions')
+    suggest_parser = subparsers.add_parser('suggest')
+    suggest_parser.add_argument('player', help='your player name')
+    suggest_parser.add_argument('-e', '--exclude', nargs='*', default=[], help='a list of players to exclude from the match suggestions')
 
-        stats_parser = subparsers.add_parser('stats')
+    stats_parser = subparsers.add_parser('stats')
 
-        html_parser = subparsers.add_parser('html')
+    html_parser = subparsers.add_parser('html')
 
-        return parser.parse_args()
-
-    def run_command(self):
-        args = self._parse_args()
-        getattr(self, args.command)(args)
-
-    def add(self, args):
-        model.add(args.home, args.away, args.home_score, args.away_score, args.overtime)
-        view.print_game_addition(args.home, args.away, args.home_score, args.away_score, args.overtime)
-
-    def suggest(self, args):
-        self.view.print_suggestions(args.player, args.exclude)
-
-    def stats(self, args):
-        self.view.print_stats()
-
-    def html(self, args):
-        self.view.print_html()
+    return parser.parse_args()
 
 if __name__ == '__main__':
+    args = parse_args()
     model = Model()
     view = View(model)
-    nhl = NHL(model, view)
-    nhl.run_command()
+    control = Control(model, view)
+    control.run_command(args.command, args)
     model.save()
