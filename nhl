@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import argparse
-import operator
 
 from model import Model
 from view import View
@@ -56,42 +55,13 @@ The most commonly used nhl commands are:
 
     def add(self, args):
         model.add(args.home, args.away, args.home_score, args.away_score, args.overtime)
-
-        overtime_print = ", OT" if args.overtime else ""
-        print "Successfully added game \"%s @ %s: %d-%d%s\"" % ( args.away
-                                                               , args.home
-                                                               , args.away_score
-                                                               , args.home_score
-                                                               , overtime_print
-                                                               )
-
-    def _suggest_matches(self, player, exclude):
-        for player_name in exclude:
-            if player_name in model.player_dict:
-                del model.player_dict[player_name]
-
-            for pn, p in model.player_dict.iteritems():
-                if player_name in p.match_count:
-                    del p.match_count[player_name]
-
-        least_played_player = min(player.match_counts.iteritems(), key=operator.itemgetter(1))[0]
-        player_least_played_games = min(model.player_dict.values(), key=operator.attrgetter('gp')).name
-        leader = max(model.player_dict.values()).name
-
-        return least_played_player, player_least_played_games, leader
+        view.print_game_addition(args.home, args.away, args.home_score, args.away_score, args.overtime)
 
     def suggest(self, args):
-        player = model.player_dict[args.player]
-        least_played_player, player_least_played_games, leader = self._suggest_matches(player, args.exclude)
-
-
-        print "Least played player            - %s, %s" % (least_played_player, "away" if model.player_dict[least_played_player] > player else "home")
-        print "Player with least played games - %s, %s" % (player_least_played_games, "away" if model.player_dict[player_least_played_games] > player else "home")
-        print "Season leader                  - %s, away" % leader
+        self.view.print_suggestions(args.player, args.exclude)
 
     def stats(self, args):
         self.view.print_stats()
-
 
     def html(self, args):
         self.view.print_html()
