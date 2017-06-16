@@ -132,6 +132,13 @@
             "away": "JOHAN3",
             "OT": true,
             "JOHAN3": 3
+        },
+        {
+            "JOHAN4": 0,
+            "home": "JOHAN3",
+            "away": "JOHAN4",
+            "OT": false,
+            "JOHAN3": 3
         }
     ]
 }
