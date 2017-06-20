@@ -127,12 +127,12 @@ class Model:
         least_played_player_name = min(filtered_match_counts.iteritems(), key=operator.itemgetter(1))[0]
         return self.player_dict[least_played_player_name]
 
-    def get_player_least_played_games(self, excluded_players=[]):
+    def get_player_least_played_games(self, excluded_players):
         filtered_players = { pn: p for (pn, p) in self.player_dict.iteritems() if pn not in excluded_players }
         player_least_played_games_name = min(filtered_players.values(), key=operator.attrgetter('gp')).name
         return self.player_dict[player_least_played_games_name]
 
-    def get_leader(self, excluded_players=[]):
+    def get_leader(self, excluded_players):
         filtered_players = { pn: p for (pn, p) in self.player_dict.iteritems() if pn not in excluded_players }
         leader_name = max(filtered_players.values()).name
         return self.player_dict[leader_name]

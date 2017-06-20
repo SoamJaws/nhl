@@ -86,6 +86,7 @@ class ConsoleView:
             print row
 
     def print_suggestions(self, player_name, excluded_players):
+        excluded_players.append(player_name)
         least_played_player = self.model.get_least_played_player(player_name, excluded_players)
         player_least_played_games = self.model.get_player_least_played_games(excluded_players)
         leader = self.model.get_leader(excluded_players)
@@ -177,8 +178,8 @@ class HtmlView():
         printed = {}
         for player_name, player in self.model.player_dict.iteritems():
             least_played_player = self.model.get_least_played_player(player_name)
-            player_least_played_games = self.model.get_player_least_played_games()
-            leader = self.model.get_leader()
+            player_least_played_games = self.model.get_player_least_played_games([player_name])
+            leader = self.model.get_leader([player_name])
             print "<tr class=\"player\">"
             print "<th>%s</th>" % player.name
             print "<th>%s</th>" % least_played_player.name
