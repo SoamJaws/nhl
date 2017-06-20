@@ -181,6 +181,20 @@
             "away": "JOHAN3",
             "OT": true,
             "JOHAN3": 3
+        },
+        {
+            "home": "LINUS",
+            "away": "JOHAN3",
+            "OT": false,
+            "LINUS": 1,
+            "JOHAN3": 2
+        },
+        {
+            "home": "LINUS",
+            "away": "JOHAN3",
+            "OT": false,
+            "LINUS": 4,
+            "JOHAN3": 2
         }
     ]
 }
