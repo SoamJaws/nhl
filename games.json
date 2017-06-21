@@ -195,6 +195,20 @@
             "OT": false,
             "LINUS": 4,
             "JOHAN3": 2
+        },
+        {
+            "home": "LINUS",
+            "away": "JONAS",
+            "OT": false,
+            "LINUS": 2,
+            "JONAS": 3
+        },
+        {
+            "JOHAN4": 1,
+            "home": "JOHAN3",
+            "away": "JOHAN4",
+            "OT": false,
+            "JOHAN3": 5
         }
     ]
 }
