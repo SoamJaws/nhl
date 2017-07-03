@@ -369,7 +369,7 @@
         {
             "home": "JONAS",
             "away": "JOHAN3",
-            "OT": true,
+            "OT": false,
             "JONAS": 1,
             "JOHAN3": 4
         }
