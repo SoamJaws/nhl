@@ -30,7 +30,7 @@ class ConsoleView:
     def _get_header(self):
         rows = []
         rows.append(self._get_filled_line("-"))
-        rows.append("|" + self.model.season.replace("_", " ").upper().center(self.total_w) + "|")
+        rows.append("|" + self.model.current_season.replace("_", " ").upper().center(self.total_w) + "|")
         rows.append(self._get_filled_line("-"))
         rows.append(self.format_string_row % ( "#"
                                              , "Player"
@@ -112,7 +112,7 @@ class HtmlView():
 
     def _print_stats_table(self):
         print "<table>"
-        print "<caption>%s</caption>" % self.model.season.replace("_", " ").upper()
+        print "<caption>%s</caption>" % self.model.current_season.replace("_", " ").upper()
         print "<tr class=\"header\">"
         print "<th>#</th>"
         print "<th>Player</th>"

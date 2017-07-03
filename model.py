@@ -38,7 +38,7 @@ class Model:
     def __init__(self):
         today = date.today()
         self.games_file = "games.json" 
-        self.season = "%d_%s" % (today.year, calendar.month_abbr[today.month])
+        self.current_season = "%d_%s" % (today.year, calendar.month_abbr[today.month])
 
         if os.path.exists(self.games_file):
             with open(self.games_file) as data_file:
@@ -46,8 +46,8 @@ class Model:
         else:
             self.data = []
 
-        if not self.season in self.data:
-            self.data[self.season] = []
+        if not self.current_season in self.data:
+            self.data[self.current_season] = []
 
         self._load_players()
 
@@ -60,88 +60,111 @@ class Model:
         # "GF"   : Goals for
         # "GA"   : Goals against
         # "DIFF" : Goal difference
-        self.player_dict = {}
+        self.player_dicts = {}
+        self.player_lists = {}
+        for season, data in self.data.iteritems():
+            self.player_dicts[season] = {}
+            self.player_lists[season] = []
+            for entry in self.data[season]:
+                player_dict = self.player_dicts[season]
+                player_list = self.player_lists[season]
+                home = entry["home"]
+                away = entry["away"]
+                home_score = entry[home]
+                away_score = entry[away]
+                OT = entry["OT"]
 
-        for entry in self.data[self.season]:
-            home = entry["home"]
-            away = entry["away"]
-            home_score = entry[home]
-            away_score = entry[away]
-            OT = entry["OT"]
+                if not home in player_dict:
+                    player_dict[home] = Player(home)
+                if not away in player_dict:
+                    player_dict[away] = Player(away)
 
-            if not home in self.player_dict:
-                self.player_dict[home] = Player(home)
-            if not away in self.player_dict:
-                self.player_dict[away] = Player(away)
+                home_player = player_dict[home]
+                away_player = player_dict[away]
 
-            home_player = self.player_dict[home]
-            away_player = self.player_dict[away]
+                home_player.gp += 1
+                home_player.gf += home_score
+                home_player.ga += away_score
 
-            home_player.gp += 1
-            home_player.gf += home_score
-            home_player.ga += away_score
+                away_player.gp += 1
+                away_player.gf += away_score
+                away_player.ga += home_score
 
-            away_player.gp += 1
-            away_player.gf += away_score
-            away_player.ga += home_score
-
-            if not away in home_player.match_counts:
-                home_player.match_counts[away] = 1
-            else:
-                home_player.match_counts[away] += 1
-            if not home in away_player.match_counts:
-                away_player.match_counts[home] = 1
-            else:
-                away_player.match_counts[home] += 1
-
-            if home_score > away_score:
-                away_player.l += 1
-                if OT:
-                    home_player.ot += 1
+                if not away in home_player.match_counts:
+                    home_player.match_counts[away] = 1
                 else:
-                    home_player.w += 1
-            elif home_score < away_score:
-                home_player.l += 1
-                if OT:
-                    away_player.ot += 1
+                    home_player.match_counts[away] += 1
+                if not home in away_player.match_counts:
+                    away_player.match_counts[home] = 1
                 else:
-                    away_player.w += 1
-        for name1, player in self.player_dict.iteritems():
-            for name2 in self.player_dict:
-                if not (name1 == name2 or name2 in player.match_counts):
-                    player.match_counts[name2] = 0
-        self.player_list = list(self.player_dict.values())
-        self.player_list.sort(reverse=True)
+                    away_player.match_counts[home] += 1
+
+                if home_score > away_score:
+                    away_player.l += 1
+                    if OT:
+                        home_player.ot += 1
+                    else:
+                        home_player.w += 1
+                elif home_score < away_score:
+                    home_player.l += 1
+                    if OT:
+                        away_player.ot += 1
+                    else:
+                        away_player.w += 1
+            for name1, player in player_dict.iteritems():
+                for name2 in player_dict:
+                    if not (name1 == name2 or name2 in player.match_counts):
+                        player.match_counts[name2] = 0
+            player_list = list(player_dict.values())
+            player_list.sort(reverse=True)
 
     def add(self, home, away, home_score, away_score, overtime):
-        if not self.season in self.data:
-            self.data[self.season] = []
-        self.data[self.season].append({ "home" : home
+        if not self.current_season in self.data:
+            self.data[self.current_season] = []
+        self.data[self.current_season].append({ "home" : home
                                       , "away" : away
                                       , home   : home_score
                                       , away   : away_score
                                       , "OT"   : overtime
                                       })
 
-    def get_player(self, player_name):
-        return self.player_dict[player_name]
+    def get_player(self, player_name, season=None):
+        if not season:
+            season = self.current_season
+        return self.player_dicts[season][player_name]
 
-    def get_least_played_player(self, player_name, excluded_players=[]):
-        player = self.player_dict[player_name]
+    def get_least_played_player(self, player_name, excluded_players=[], season=None):
+        if not season:
+            season = self.current_season
+        player = self.player_dicts[season][player_name]
         filtered_match_counts = { pn: mc for (pn, mc) in player.match_counts.iteritems() if pn not in excluded_players }
         least_played_player_name = min(filtered_match_counts.iteritems(), key=operator.itemgetter(1))[0]
-        return self.player_dict[least_played_player_name]
+        return self.player_dicts[season][least_played_player_name]
 
-    def get_player_least_played_games(self, excluded_players):
-        filtered_players = { pn: p for (pn, p) in self.player_dict.iteritems() if pn not in excluded_players }
+    def get_player_least_played_games(self, excluded_players, season=None):
+        if not season:
+            season = self.current_season
+        filtered_players = { pn: p for (pn, p) in self.player_dicts[season].iteritems() if pn not in excluded_players }
         player_least_played_games_name = min(filtered_players.values(), key=operator.attrgetter('gp')).name
-        return self.player_dict[player_least_played_games_name]
+        return self.player_dicts[season][player_least_played_games_name]
 
-    def get_leader(self, excluded_players):
-        filtered_players = { pn: p for (pn, p) in self.player_dict.iteritems() if pn not in excluded_players }
+    def get_leader(self, excluded_players, season=None):
+        if not season:
+            season = self.current_season
+        filtered_players = { pn: p for (pn, p) in self.player_dicts[season].iteritems() if pn not in excluded_players }
         leader_name = max(filtered_players.values()).name
-        return self.player_dict[leader_name]
+        return self.player_dicts[season][leader_name]
 
     def save(self):
         with open(self.games_file, 'w') as data_file:
             json.dump(self.data, data_file, indent=4, separators=(',', ': '))
+
+    @property
+    def player_dict(self):
+        print str(self.player_dicts)
+        return self.player_dicts[self.current_season]
+
+    @property
+    def player_list(self):
+        print str(self.player_lists)
+        return self.player_lists[self.current_season]
