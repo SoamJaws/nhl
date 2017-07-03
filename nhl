@@ -21,6 +21,7 @@ The most commonly used nhl commands are:
    add     Add a game entry
    suggest Get a suggestion of who you should challenge
    stats   Print the current standings
+   html    Print the current standings in html
 ''')
 
     subparsers = parser.add_subparsers(help='Subcommand to run', dest='command')

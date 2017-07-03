@@ -143,6 +143,38 @@ class HtmlView():
             print "</tr>"
         print "</table>"
 
+    def _print_champions_table(self):
+        print "<table>"
+        print "<caption>CHAMPIONS</caption>"
+        print "<tr class=\"header\">"
+        print "<th>Season</th>"
+        print "<th>Player</th>"
+        print "<th style=\"cursor:pointer;\" title=\"Win loss ratio\">WLR</th>"
+        print "<th style=\"cursor:pointer;\" title=\"Games played\">GP</th>"
+        print "<th style=\"cursor:pointer;\" title=\"Wins\">W</th>"
+        print "<th style=\"cursor:pointer;\" title=\"Losses\">L</th>"
+        print "<th style=\"cursor:pointer;\" title=\"Overtime wins\">OT</th>"
+        print "<th style=\"cursor:pointer;\" title=\"Goals for\">GF</th>"
+        print "<th style=\"cursor:pointer;\" title=\"Goals against\">GA</th>"
+        print "<th style=\"cursor:pointer;\" title=\"Goal difference\">DIFF</th>"
+        print "</tr>"
+
+        for season in [ season for season in self.model.seasons if season != self.model.current_season ]:
+            player = self.model.get_leader(season=season)
+            print "<tr class=\"player\">"
+            print "<th>%s</th>"   % season.replace("_", " ").upper()
+            print "<th>%s</th>"   % player.name
+            print "<th>%.2f</th>" % player.wlr
+            print "<th>%d</th>"   % player.gp
+            print "<th>%d</th>"   % player.w
+            print "<th>%d</th>"   % player.l
+            print "<th>%d</th>"   % player.ot
+            print "<th>%d</th>"   % player.gf
+            print "<th>%d</th>"   % player.ga
+            print "<th>%d</th>"   % player.diff
+            print "</tr>"
+        print "</table>"
+
     def _print_match_count_table(self):
         print "<table>"
         print "<caption>GAMES PLAYED</caption>"
@@ -198,5 +230,7 @@ class HtmlView():
         self._print_match_count_table()
         print "<br>"
         self._print_suggestions_table()
+        print "<br>"
+        self._print_champions_table()
         print "</body>"
         print "</html>"

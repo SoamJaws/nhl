@@ -66,21 +66,19 @@ class Model:
             self.player_dicts[season] = {}
             self.player_lists[season] = []
             for entry in self.data[season]:
-                player_dict = self.player_dicts[season]
-                player_list = self.player_lists[season]
                 home = entry["home"]
                 away = entry["away"]
                 home_score = entry[home]
                 away_score = entry[away]
                 OT = entry["OT"]
 
-                if not home in player_dict:
-                    player_dict[home] = Player(home)
-                if not away in player_dict:
-                    player_dict[away] = Player(away)
+                if not home in self.player_dicts[season]:
+                    self.player_dicts[season][home] = Player(home)
+                if not away in self.player_dicts[season]:
+                    self.player_dicts[season][away] = Player(away)
 
-                home_player = player_dict[home]
-                away_player = player_dict[away]
+                home_player = self.player_dicts[season][home]
+                away_player = self.player_dicts[season][away]
 
                 home_player.gp += 1
                 home_player.gf += home_score
@@ -111,12 +109,12 @@ class Model:
                         away_player.ot += 1
                     else:
                         away_player.w += 1
-            for name1, player in player_dict.iteritems():
-                for name2 in player_dict:
+            for name1, player in self.player_dicts[season].iteritems():
+                for name2 in self.player_dicts[season]:
                     if not (name1 == name2 or name2 in player.match_counts):
                         player.match_counts[name2] = 0
-            player_list = list(player_dict.values())
-            player_list.sort(reverse=True)
+            self.player_lists[season] = list(self.player_dicts[season].values())
+            self.player_lists[season].sort(reverse=True)
 
     def add(self, home, away, home_score, away_score, overtime):
         if not self.current_season in self.data:
@@ -148,7 +146,7 @@ class Model:
         player_least_played_games_name = min(filtered_players.values(), key=operator.attrgetter('gp')).name
         return self.player_dicts[season][player_least_played_games_name]
 
-    def get_leader(self, excluded_players, season=None):
+    def get_leader(self, excluded_players=[], season=None):
         if not season:
             season = self.current_season
         filtered_players = { pn: p for (pn, p) in self.player_dicts[season].iteritems() if pn not in excluded_players }
@@ -161,10 +159,12 @@ class Model:
 
     @property
     def player_dict(self):
-        print str(self.player_dicts)
         return self.player_dicts[self.current_season]
 
     @property
     def player_list(self):
-        print str(self.player_lists)
         return self.player_lists[self.current_season]
+
+    @property
+    def seasons(self):
+        return [ season for season, data in self.data.iteritems() ]
