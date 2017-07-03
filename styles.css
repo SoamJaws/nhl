@@ -22,6 +22,7 @@ caption {
 th {
     padding: 0 1em;
     text-align: left;
+    white-space: nowrap;
 }
 
 tr:nth-child(even) {
