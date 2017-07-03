@@ -2,16 +2,16 @@ class ConsoleView:
 
     def __init__(self, model):
         self.model = model
-        self.pos_w    = max(1, len(str(len(self.model.player_list))))
-        self.player_w = max([ len(p.name) for p in self.model.player_list ])
-        self.wlr_w    = max(2, max([ len("%.2f" % round(p.wlr, 2)) for p in self.model.player_list ]))
-        self.gp_w     = max(2, max([ len(str(p.gp))   for p in self.model.player_list ]))
-        self.w_w      = max(1, max([ len(str(p.w))    for p in self.model.player_list ]))
-        self.l_w      = max(1, max([ len(str(p.l))    for p in self.model.player_list ]))
-        self.ot_w     = max(2, max([ len(str(p.ot))   for p in self.model.player_list ]))
-        self.gf_w     = max(2, max([ len(str(p.gf))   for p in self.model.player_list ]))
-        self.ga_w     = max(2, max([ len(str(p.ga))   for p in self.model.player_list ]))
-        self.diff_w   = max(4, max([ len(str(p.diff)) for p in self.model.player_list ]))
+        self.pos_w    = max(1, len(str(len(self.model.player_list)))) if self.model.player_list else 0
+        self.player_w = max([ len(p.name) for p in self.model.player_list ]) if self.model.player_list else 0
+        self.wlr_w    = max(2, max([ len("%.2f" % round(p.wlr, 2)) for p in self.model.player_list ])) if self.model.player_list else 0
+        self.gp_w     = max(2, max([ len(str(p.gp))   for p in self.model.player_list ])) if self.model.player_list else 0
+        self.w_w      = max(1, max([ len(str(p.w))    for p in self.model.player_list ])) if self.model.player_list else 0
+        self.l_w      = max(1, max([ len(str(p.l))    for p in self.model.player_list ])) if self.model.player_list else 0
+        self.ot_w     = max(2, max([ len(str(p.ot))   for p in self.model.player_list ])) if self.model.player_list else 0
+        self.gf_w     = max(2, max([ len(str(p.gf))   for p in self.model.player_list ])) if self.model.player_list else 0
+        self.ga_w     = max(2, max([ len(str(p.ga))   for p in self.model.player_list ])) if self.model.player_list else 0
+        self.diff_w   = max(4, max([ len(str(p.diff)) for p in self.model.player_list ])) if self.model.player_list else 0
         self.total_w  = self.pos_w + self.player_w + self.wlr_w + self.gp_w + self.w_w + self.l_w + self.ot_w + self.gf_w + self.ga_w + self.diff_w + 29
 
     def _get_filled_line(self, c):

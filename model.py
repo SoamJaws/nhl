@@ -45,6 +45,10 @@ class Model:
                     self.data = json.load(data_file)
         else:
             self.data = []
+
+        if not self.season in self.data:
+            self.data[self.season] = []
+
         self._load_players()
 
     def _load_players(self):
@@ -57,6 +61,7 @@ class Model:
         # "GA"   : Goals against
         # "DIFF" : Goal difference
         self.player_dict = {}
+
         for entry in self.data[self.season]:
             home = entry["home"]
             away = entry["away"]
