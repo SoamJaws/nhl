@@ -463,6 +463,13 @@
             "OT": false,
             "LINUS": 3,
             "JOHAN3": 1
+        },
+        {
+            "JOHAN4": 2,
+            "home": "JOHAN3",
+            "away": "JOHAN4",
+            "OT": false,
+            "JOHAN3": 3
         }
     ]
 }
