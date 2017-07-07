@@ -8,7 +8,7 @@ class ConsoleView:
         self.gp_w     = max(2, max([ len(str(p.gp))   for p in self.model.player_list ])) if self.model.player_list else 0
         self.w_w      = max(1, max([ len(str(p.w))    for p in self.model.player_list ])) if self.model.player_list else 0
         self.l_w      = max(1, max([ len(str(p.l))    for p in self.model.player_list ])) if self.model.player_list else 0
-        self.ot_w     = max(2, max([ len(str(p.ot))   for p in self.model.player_list ])) if self.model.player_list else 0
+        self.ot_w     = max(2, max([ len(str(p.otw))  for p in self.model.player_list ])) if self.model.player_list else 0
         self.gf_w     = max(2, max([ len(str(p.gf))   for p in self.model.player_list ])) if self.model.player_list else 0
         self.ga_w     = max(2, max([ len(str(p.ga))   for p in self.model.player_list ])) if self.model.player_list else 0
         self.diff_w   = max(4, max([ len(str(p.diff)) for p in self.model.player_list ])) if self.model.player_list else 0
@@ -72,7 +72,7 @@ class ConsoleView:
                                                  , player.gp
                                                  , player.w
                                                  , player.l
-                                                 , player.ot
+                                                 , player.otw
                                                  , player.gf
                                                  , player.ga
                                                  , player.diff
@@ -136,7 +136,7 @@ class HtmlView():
             print "<th>%d</th>"   % player.gp
             print "<th>%d</th>"   % player.w
             print "<th>%d</th>"   % player.l
-            print "<th>%d</th>"   % player.ot
+            print "<th>%d</th>"   % player.otw
             print "<th>%d</th>"   % player.gf
             print "<th>%d</th>"   % player.ga
             print "<th>%d</th>"   % player.diff
@@ -168,7 +168,7 @@ class HtmlView():
             print "<th>%d</th>"   % player.gp
             print "<th>%d</th>"   % player.w
             print "<th>%d</th>"   % player.l
-            print "<th>%d</th>"   % player.ot
+            print "<th>%d</th>"   % player.otw
             print "<th>%d</th>"   % player.gf
             print "<th>%d</th>"   % player.ga
             print "<th>%d</th>"   % player.diff

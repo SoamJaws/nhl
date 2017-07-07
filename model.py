@@ -11,7 +11,8 @@ class Player:
         self.gp = 0
         self.w = 0
         self.l = 0
-        self.ot = 0
+        self.otw = 0
+        self.otl = 0
         self.gf = 0
         self.ga = 0
         self.match_counts = {}
@@ -25,8 +26,13 @@ class Player:
 
     @property
     def wlr(self):
-        wins = self.w + self.ot * 0.5
+        wins = (self.w - self.otw) + self.otw * 0.5
         return wins/float(self.l) if self.l > 0 else float('inf')
+
+    @property
+    def gpp(Self):
+        totalgames = self.w + self.l
+        return (self.w * 2 + self.otl) / float(totalggames)
 
     @property
     def diff(self):
@@ -99,16 +105,16 @@ class Model:
 
                 if home_score > away_score:
                     away_player.l += 1
+                    home_player.w += 1
                     if OT:
-                        home_player.ot += 1
-                    else:
-                        home_player.w += 1
+                        home_player.otw += 1
+                        away_player.otl += 1
                 elif home_score < away_score:
                     home_player.l += 1
+                    away_player.w += 1
                     if OT:
-                        away_player.ot += 1
-                    else:
-                        away_player.w += 1
+                        away_player.otw += 1
+                        home_player.otl += 1
             for name1, player in self.player_dicts[season].iteritems():
                 for name2 in self.player_dicts[season]:
                     if not (name1 == name2 or name2 in player.match_counts):
