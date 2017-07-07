@@ -13,7 +13,7 @@ class ConsoleView:
         self.gf_w     = max(2, max([ len(str(p.gf))   for p in self.model.player_list ])) if self.model.player_list else 0
         self.ga_w     = max(2, max([ len(str(p.ga))   for p in self.model.player_list ])) if self.model.player_list else 0
         self.diff_w   = max(4, max([ len(str(p.diff)) for p in self.model.player_list ])) if self.model.player_list else 0
-        self.total_w  = self.pos_w + self.player_w + self.wlr_w + self.ppg_w + self.gp_w + self.w_w + self.l_w + self.ot_w + self.gf_w + self.ga_w + self.diff_w + 31
+        self.total_w  = self.pos_w + self.player_w + self.wlr_w + self.ppg_w + self.gp_w + self.w_w + self.l_w + self.ot_w + self.gf_w + self.ga_w + self.diff_w + 32
 
     def _get_filled_line(self, c):
         return self.format_string_line % ( c * self.pos_w
@@ -122,6 +122,7 @@ class HtmlView():
         print "<th>#</th>"
         print "<th>Player</th>"
         print "<th style=\"cursor:pointer;\" title=\"Win loss ratio\">WLR</th>"
+        print "<th style=\"cursor:pointer;\" title=\"Point per game\">PPG</th>"
         print "<th style=\"cursor:pointer;\" title=\"Games played\">GP</th>"
         print "<th style=\"cursor:pointer;\" title=\"Wins\">W</th>"
         print "<th style=\"cursor:pointer;\" title=\"Losses\">L</th>"
@@ -138,6 +139,7 @@ class HtmlView():
             print "<th>%d</th>"   % position
             print "<th>%s</th>"   % player.name
             print "<th>%.2f</th>" % player.wlr
+            print "<th>%.2f</th>" % player.ppg
             print "<th>%d</th>"   % player.gp
             print "<th>%d</th>"   % player.w
             print "<th>%d</th>"   % player.l
@@ -155,6 +157,7 @@ class HtmlView():
         print "<th>Season</th>"
         print "<th>Player</th>"
         print "<th style=\"cursor:pointer;\" title=\"Win loss ratio\">WLR</th>"
+        print "<th style=\"cursor:pointer;\" title=\"Points per game\">PPG</th>"
         print "<th style=\"cursor:pointer;\" title=\"Games played\">GP</th>"
         print "<th style=\"cursor:pointer;\" title=\"Wins\">W</th>"
         print "<th style=\"cursor:pointer;\" title=\"Losses\">L</th>"
@@ -170,6 +173,7 @@ class HtmlView():
             print "<th>%s</th>"   % season.replace("_", " ").upper()
             print "<th>%s</th>"   % player.name
             print "<th>%.2f</th>" % player.wlr
+            print "<th>%.2f</th>" % player.ppg
             print "<th>%d</th>"   % player.gp
             print "<th>%d</th>"   % player.w
             print "<th>%d</th>"   % player.l
