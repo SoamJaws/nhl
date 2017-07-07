@@ -9,11 +9,12 @@ class ConsoleView:
         self.gp_w     = max(2, max([ len(str(p.gp))   for p in self.model.player_list ])) if self.model.player_list else 0
         self.w_w      = max(1, max([ len(str(p.w))    for p in self.model.player_list ])) if self.model.player_list else 0
         self.l_w      = max(1, max([ len(str(p.l))    for p in self.model.player_list ])) if self.model.player_list else 0
-        self.ot_w     = max(2, max([ len(str(p.otw))  for p in self.model.player_list ])) if self.model.player_list else 0
+        self.otw_w    = max(3, max([ len(str(p.otw))  for p in self.model.player_list ])) if self.model.player_list else 0
+        self.otl_w    = max(3, max([ len(str(p.otl))  for p in self.model.player_list ])) if self.model.player_list else 0
         self.gf_w     = max(2, max([ len(str(p.gf))   for p in self.model.player_list ])) if self.model.player_list else 0
         self.ga_w     = max(2, max([ len(str(p.ga))   for p in self.model.player_list ])) if self.model.player_list else 0
         self.diff_w   = max(4, max([ len(str(p.diff)) for p in self.model.player_list ])) if self.model.player_list else 0
-        self.total_w  = self.pos_w + self.player_w + self.wlr_w + self.ppg_w + self.gp_w + self.w_w + self.l_w + self.ot_w + self.gf_w + self.ga_w + self.diff_w + 32
+        self.total_w  = self.pos_w + self.player_w + self.wlr_w + self.ppg_w + self.gp_w + self.w_w + self.l_w + self.otw_w + self.otl_w + self.gf_w + self.ga_w + self.diff_w + 35
 
     def _get_filled_line(self, c):
         return self.format_string_line % ( c * self.pos_w
@@ -23,7 +24,8 @@ class ConsoleView:
                                          , c * self.gp_w
                                          , c * self.w_w
                                          , c * self.l_w
-                                         , c * self.ot_w
+                                         , c * self.otw_w
+                                         , c * self.otl_w
                                          , c * self.gf_w
                                          , c * self.ga_w
                                          , c * self.diff_w
@@ -41,7 +43,8 @@ class ConsoleView:
                                              , "GP"
                                              , "W"
                                              , "L"
-                                             , "OT"
+                                             , "OTW"
+                                             , "OTL"
                                              , "GF"
                                              , "GA"
                                              , "DIFF"
@@ -50,14 +53,15 @@ class ConsoleView:
         return rows
 
     def _get_rows(self):
-        self.format_string_row = (("| %%-%ds " + "| %%-%ds " * 10 + "|")) % ( self.pos_w
+        self.format_string_row = (("| %%-%ds " + "| %%-%ds " * 11 + "|")) % ( self.pos_w
                                                                             , self.player_w
                                                                             , self.wlr_w
                                                                             , self.ppg_w
                                                                             , self.gp_w
                                                                             , self.w_w
                                                                             , self.l_w
-                                                                            , self.ot_w
+                                                                            , self.otw_w
+                                                                            , self.otl_w
                                                                             , self.gf_w
                                                                             , self.ga_w
                                                                             , self.diff_w
@@ -76,8 +80,9 @@ class ConsoleView:
                                                  , "%.2f" % player.ppg
                                                  , player.gp
                                                  , player.w - player.otw
-                                                 , player.l
+                                                 , player.l - player.otl
                                                  , player.otw
+                                                 , player.otl
                                                  , player.gf
                                                  , player.ga
                                                  , player.diff
@@ -126,7 +131,8 @@ class HtmlView():
         print "<th style=\"cursor:pointer;\" title=\"Games played\">GP</th>"
         print "<th style=\"cursor:pointer;\" title=\"Wins\">W</th>"
         print "<th style=\"cursor:pointer;\" title=\"Losses\">L</th>"
-        print "<th style=\"cursor:pointer;\" title=\"Overtime wins\">OT</th>"
+        print "<th style=\"cursor:pointer;\" title=\"Overtime wins\">OTW</th>"
+        print "<th style=\"cursor:pointer;\" title=\"Overtime losses\">OTL</th>"
         print "<th style=\"cursor:pointer;\" title=\"Goals for\">GF</th>"
         print "<th style=\"cursor:pointer;\" title=\"Goals against\">GA</th>"
         print "<th style=\"cursor:pointer;\" title=\"Goal difference\">DIFF</th>"
@@ -142,8 +148,9 @@ class HtmlView():
             print "<th>%.2f</th>" % player.ppg
             print "<th>%d</th>"   % player.gp
             print "<th>%d</th>"   % (player.w - player.otw)
-            print "<th>%d</th>"   % player.l
+            print "<th>%d</th>"   % (player.l - player.otl)
             print "<th>%d</th>"   % player.otw
+            print "<th>%d</th>"   % player.otl
             print "<th>%d</th>"   % player.gf
             print "<th>%d</th>"   % player.ga
             print "<th>%d</th>"   % player.diff
@@ -161,7 +168,8 @@ class HtmlView():
         print "<th style=\"cursor:pointer;\" title=\"Games played\">GP</th>"
         print "<th style=\"cursor:pointer;\" title=\"Wins\">W</th>"
         print "<th style=\"cursor:pointer;\" title=\"Losses\">L</th>"
-        print "<th style=\"cursor:pointer;\" title=\"Overtime wins\">OT</th>"
+        print "<th style=\"cursor:pointer;\" title=\"Overtime wins\">OTW</th>"
+        print "<th style=\"cursor:pointer;\" title=\"Overtime losses\">OTL</th>"
         print "<th style=\"cursor:pointer;\" title=\"Goals for\">GF</th>"
         print "<th style=\"cursor:pointer;\" title=\"Goals against\">GA</th>"
         print "<th style=\"cursor:pointer;\" title=\"Goal difference\">DIFF</th>"
@@ -176,8 +184,9 @@ class HtmlView():
             print "<th>%.2f</th>" % player.ppg
             print "<th>%d</th>"   % player.gp
             print "<th>%d</th>"   % (player.w - player.otw)
-            print "<th>%d</th>"   % player.l
+            print "<th>%d</th>"   % (player.l - player.otl)
             print "<th>%d</th>"   % player.otw
+            print "<th>%d</th>"   % player.otl
             print "<th>%d</th>"   % player.gf
             print "<th>%d</th>"   % player.ga
             print "<th>%d</th>"   % player.diff
