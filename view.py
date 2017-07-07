@@ -75,7 +75,7 @@ class ConsoleView:
                                                  , "%.2f" % player.wlr
                                                  , "%.2f" % player.ppg
                                                  , player.gp
-                                                 , player.w
+                                                 , player.w - player.otw
                                                  , player.l
                                                  , player.otw
                                                  , player.gf
@@ -141,7 +141,7 @@ class HtmlView():
             print "<th>%.2f</th>" % player.wlr
             print "<th>%.2f</th>" % player.ppg
             print "<th>%d</th>"   % player.gp
-            print "<th>%d</th>"   % player.w
+            print "<th>%d</th>"   % player.w - player.otw
             print "<th>%d</th>"   % player.l
             print "<th>%d</th>"   % player.otw
             print "<th>%d</th>"   % player.gf
@@ -175,7 +175,7 @@ class HtmlView():
             print "<th>%.2f</th>" % player.wlr
             print "<th>%.2f</th>" % player.ppg
             print "<th>%d</th>"   % player.gp
-            print "<th>%d</th>"   % player.w
+            print "<th>%d</th>"   % player.w - player.otw
             print "<th>%d</th>"   % player.l
             print "<th>%d</th>"   % player.otw
             print "<th>%d</th>"   % player.gf
