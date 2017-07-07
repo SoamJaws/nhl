@@ -498,6 +498,13 @@
             "OT": true,
             "JONAS": 3,
             "JOHAN3": 2
+        },
+        {
+            "home": "JOHAN3",
+            "away": "JONAS",
+            "OT": false,
+            "JONAS": 3,
+            "JOHAN3": 1
         }
     ]
 }
