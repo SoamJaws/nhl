@@ -30,9 +30,9 @@ class Player:
         return wins/float(self.l) if self.l > 0 else float('inf')
 
     @property
-    def gpp(Self):
+    def ppg(self):
         totalgames = self.w + self.l
-        return (self.w * 2 + self.otl) / float(totalggames)
+        return (self.w * 2 + self.otl) / float(totalgames)
 
     @property
     def diff(self):

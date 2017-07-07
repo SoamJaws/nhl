@@ -5,6 +5,7 @@ class ConsoleView:
         self.pos_w    = max(1, len(str(len(self.model.player_list)))) if self.model.player_list else 0
         self.player_w = max([ len(p.name) for p in self.model.player_list ]) if self.model.player_list else 0
         self.wlr_w    = max(2, max([ len("%.2f" % round(p.wlr, 2)) for p in self.model.player_list ])) if self.model.player_list else 0
+        self.ppg_w    = max(2, max([ len("%.2f" % round(p.ppg, 2)) for p in self.model.player_list ])) if self.model.player_list else 0
         self.gp_w     = max(2, max([ len(str(p.gp))   for p in self.model.player_list ])) if self.model.player_list else 0
         self.w_w      = max(1, max([ len(str(p.w))    for p in self.model.player_list ])) if self.model.player_list else 0
         self.l_w      = max(1, max([ len(str(p.l))    for p in self.model.player_list ])) if self.model.player_list else 0
@@ -12,12 +13,13 @@ class ConsoleView:
         self.gf_w     = max(2, max([ len(str(p.gf))   for p in self.model.player_list ])) if self.model.player_list else 0
         self.ga_w     = max(2, max([ len(str(p.ga))   for p in self.model.player_list ])) if self.model.player_list else 0
         self.diff_w   = max(4, max([ len(str(p.diff)) for p in self.model.player_list ])) if self.model.player_list else 0
-        self.total_w  = self.pos_w + self.player_w + self.wlr_w + self.gp_w + self.w_w + self.l_w + self.ot_w + self.gf_w + self.ga_w + self.diff_w + 29
+        self.total_w  = self.pos_w + self.player_w + self.wlr_w + self.ppg_w + self.gp_w + self.w_w + self.l_w + self.ot_w + self.gf_w + self.ga_w + self.diff_w + 31
 
     def _get_filled_line(self, c):
         return self.format_string_line % ( c * self.pos_w
                                          , c * self.player_w
                                          , c * self.wlr_w
+                                         , c * self.ppg_w
                                          , c * self.gp_w
                                          , c * self.w_w
                                          , c * self.l_w
@@ -35,6 +37,7 @@ class ConsoleView:
         rows.append(self.format_string_row % ( "#"
                                              , "Player"
                                              , "WLR"
+                                             , "PPG"
                                              , "GP"
                                              , "W"
                                              , "L"
@@ -47,17 +50,18 @@ class ConsoleView:
         return rows
 
     def _get_rows(self):
-        self.format_string_row = (("| %%-%ds " + "| %%-%ds " * 9 + "|")) % ( self.pos_w
-                                                                           , self.player_w
-                                                                           , self.wlr_w
-                                                                           , self.gp_w
-                                                                           , self.w_w
-                                                                           , self.l_w
-                                                                           , self.ot_w
-                                                                           , self.gf_w
-                                                                           , self.ga_w
-                                                                           , self.diff_w
-                                                                           )
+        self.format_string_row = (("| %%-%ds " + "| %%-%ds " * 10 + "|")) % ( self.pos_w
+                                                                            , self.player_w
+                                                                            , self.wlr_w
+                                                                            , self.ppg_w
+                                                                            , self.gp_w
+                                                                            , self.w_w
+                                                                            , self.l_w
+                                                                            , self.ot_w
+                                                                            , self.gf_w
+                                                                            , self.ga_w
+                                                                            , self.diff_w
+                                                                            )
         self.format_string_line = ("|" + self.format_string_row[1:-1].replace(" ", "-").replace("|", "-") + "|")
 
         rows = []
@@ -69,6 +73,7 @@ class ConsoleView:
             rows.append(self.format_string_row % ( position
                                                  , player.name
                                                  , "%.2f" % player.wlr
+                                                 , "%.2f" % player.ppg
                                                  , player.gp
                                                  , player.w
                                                  , player.l
