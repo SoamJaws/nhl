@@ -122,7 +122,7 @@ class HtmlView():
         print "<th>#</th>"
         print "<th>Player</th>"
         print "<th style=\"cursor:pointer;\" title=\"Win loss ratio\">WLR</th>"
-        print "<th style=\"cursor:pointer;\" title=\"Point per game\">PPG</th>"
+        print "<th style=\"cursor:pointer;\" title=\"Points per game\">PPG</th>"
         print "<th style=\"cursor:pointer;\" title=\"Games played\">GP</th>"
         print "<th style=\"cursor:pointer;\" title=\"Wins\">W</th>"
         print "<th style=\"cursor:pointer;\" title=\"Losses\">L</th>"
