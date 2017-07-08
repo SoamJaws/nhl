@@ -2,18 +2,18 @@ class ConsoleView:
 
     def __init__(self, model):
         self.model = model
-        self.pos_w    = max(1, len(str(len(self.model.player_list)))) if self.model.player_list else 0
-        self.player_w = max([ len(p.name) for p in self.model.player_list ]) if self.model.player_list else 0
-        self.wlr_w    = max(2, max([ len("%.2f" % round(p.wlr, 2)) for p in self.model.player_list ])) if self.model.player_list else 0
-        self.ppg_w    = max(2, max([ len("%.2f" % round(p.ppg, 2)) for p in self.model.player_list ])) if self.model.player_list else 0
-        self.gp_w     = max(2, max([ len(str(p.gp))   for p in self.model.player_list ])) if self.model.player_list else 0
-        self.w_w      = max(1, max([ len(str(p.w))    for p in self.model.player_list ])) if self.model.player_list else 0
-        self.l_w      = max(1, max([ len(str(p.l))    for p in self.model.player_list ])) if self.model.player_list else 0
-        self.otw_w    = max(3, max([ len(str(p.otw))  for p in self.model.player_list ])) if self.model.player_list else 0
-        self.otl_w    = max(3, max([ len(str(p.otl))  for p in self.model.player_list ])) if self.model.player_list else 0
-        self.gf_w     = max(2, max([ len(str(p.gf))   for p in self.model.player_list ])) if self.model.player_list else 0
-        self.ga_w     = max(2, max([ len(str(p.ga))   for p in self.model.player_list ])) if self.model.player_list else 0
-        self.diff_w   = max(4, max([ len(str(p.diff)) for p in self.model.player_list ])) if self.model.player_list else 0
+        self.pos_w    = max(1, len(str(len(self.model.player_wlr_list)))) if self.model.player_wlr_list else 0
+        self.player_w = max([ len(p.name) for p in self.model.player_wlr_list ]) if self.model.player_wlr_list else 0
+        self.wlr_w    = max(2, max([ len("%.2f" % round(p.wlr, 2)) for p in self.model.player_wlr_list ])) if self.model.player_wlr_list else 0
+        self.ppg_w    = max(2, max([ len("%.2f" % round(p.ppg, 2)) for p in self.model.player_wlr_list ])) if self.model.player_wlr_list else 0
+        self.gp_w     = max(2, max([ len(str(p.gp))   for p in self.model.player_wlr_list ])) if self.model.player_wlr_list else 0
+        self.w_w      = max(1, max([ len(str(p.w))    for p in self.model.player_wlr_list ])) if self.model.player_wlr_list else 0
+        self.l_w      = max(1, max([ len(str(p.l))    for p in self.model.player_wlr_list ])) if self.model.player_wlr_list else 0
+        self.otw_w    = max(3, max([ len(str(p.otw))  for p in self.model.player_wlr_list ])) if self.model.player_wlr_list else 0
+        self.otl_w    = max(3, max([ len(str(p.otl))  for p in self.model.player_wlr_list ])) if self.model.player_wlr_list else 0
+        self.gf_w     = max(2, max([ len(str(p.gf))   for p in self.model.player_wlr_list ])) if self.model.player_wlr_list else 0
+        self.ga_w     = max(2, max([ len(str(p.ga))   for p in self.model.player_wlr_list ])) if self.model.player_wlr_list else 0
+        self.diff_w   = max(4, max([ len(str(p.diff)) for p in self.model.player_wlr_list ])) if self.model.player_wlr_list else 0
         self.total_w  = self.pos_w + self.player_w + self.wlr_w + self.ppg_w + self.gp_w + self.w_w + self.l_w + self.otw_w + self.otl_w + self.gf_w + self.ga_w + self.diff_w + 35
 
     def _get_filled_line(self, c):
@@ -72,7 +72,7 @@ class ConsoleView:
         rows.extend(self._get_header())
 
         position = 0
-        for player in self.model.player_list:
+        for player in self.model.player_wlr_list:
             position += 1
             rows.append(self.format_string_row % ( position
                                                  , player.name
@@ -99,7 +99,7 @@ class ConsoleView:
         excluded_players.append(player_name)
         least_played_player = self.model.get_least_played_player(player_name, excluded_players)
         player_least_played_games = self.model.get_player_least_played_games(excluded_players)
-        leader = self.model.get_leader(excluded_players)
+        leader = self.model.get_wlr_leader(excluded_players)
         player = self.model.get_player(player_name)
 
         print "Least played player            - %s, %s" % (least_played_player.name, "away" if least_played_player > player else "home")
@@ -120,18 +120,49 @@ class HtmlView():
     def __init__(self, model):
         self.model = model
 
-    def _print_stats_table(self):
+    def _print_wlr_stats_table(self):
         print "<table>"
-        print "<caption>%s</caption>" % self.model.current_season.replace("_", " ").upper()
+        print "<caption>WLR %s</caption>" % self.model.current_season.replace("_", " ").upper()
         print "<tr class=\"header\">"
         print "<th>#</th>"
         print "<th>Player</th>"
         print "<th style=\"cursor:pointer;\" title=\"Win loss ratio\">WLR</th>"
-        print "<th style=\"cursor:pointer;\" title=\"Points per game\">PPG</th>"
         print "<th style=\"cursor:pointer;\" title=\"Games played\">GP</th>"
         print "<th style=\"cursor:pointer;\" title=\"Wins\">W</th>"
         print "<th style=\"cursor:pointer;\" title=\"Losses\">L</th>"
         print "<th style=\"cursor:pointer;\" title=\"Overtime wins\">OTW</th>"
+        print "<th style=\"cursor:pointer;\" title=\"Goals for\">GF</th>"
+        print "<th style=\"cursor:pointer;\" title=\"Goals against\">GA</th>"
+        print "<th style=\"cursor:pointer;\" title=\"Goal difference\">DIFF</th>"
+        print "</tr>"
+
+        position = 0
+        for player in self.model.player_wlr_list:
+            position += 1
+            print "<tr class=\"player\">"
+            print "<th>%d</th>"   % position
+            print "<th>%s</th>"   % player.name
+            print "<th>%.2f</th>" % player.wlr
+            print "<th>%d</th>"   % player.gp
+            print "<th>%d</th>"   % (player.w - player.otw)
+            print "<th>%d</th>"   % player.l
+            print "<th>%d</th>"   % player.otw
+            print "<th>%d</th>"   % player.gf
+            print "<th>%d</th>"   % player.ga
+            print "<th>%d</th>"   % player.diff
+            print "</tr>"
+        print "</table>"
+
+    def _print_ppg_stats_table(self):
+        print "<table>"
+        print "<caption>PPG %s</caption>" % self.model.current_season.replace("_", " ").upper()
+        print "<tr class=\"header\">"
+        print "<th>#</th>"
+        print "<th>Player</th>"
+        print "<th style=\"cursor:pointer;\" title=\"Points per game\">PPG</th>"
+        print "<th style=\"cursor:pointer;\" title=\"Games played\">GP</th>"
+        print "<th style=\"cursor:pointer;\" title=\"Wins\">W</th>"
+        print "<th style=\"cursor:pointer;\" title=\"Losses\">L</th>"
         print "<th style=\"cursor:pointer;\" title=\"Overtime losses\">OTL</th>"
         print "<th style=\"cursor:pointer;\" title=\"Goals for\">GF</th>"
         print "<th style=\"cursor:pointer;\" title=\"Goals against\">GA</th>"
@@ -139,17 +170,15 @@ class HtmlView():
         print "</tr>"
 
         position = 0
-        for player in self.model.player_list:
+        for player in self.model.player_ppg_list:
             position += 1
             print "<tr class=\"player\">"
             print "<th>%d</th>"   % position
             print "<th>%s</th>"   % player.name
-            print "<th>%.2f</th>" % player.wlr
             print "<th>%.2f</th>" % player.ppg
             print "<th>%d</th>"   % player.gp
-            print "<th>%d</th>"   % (player.w - player.otw)
+            print "<th>%d</th>"   % player.w
             print "<th>%d</th>"   % (player.l - player.otl)
-            print "<th>%d</th>"   % player.otw
             print "<th>%d</th>"   % player.otl
             print "<th>%d</th>"   % player.gf
             print "<th>%d</th>"   % player.ga
@@ -157,18 +186,48 @@ class HtmlView():
             print "</tr>"
         print "</table>"
 
-    def _print_champions_table(self):
+    def _print_wlr_champions_table(self):
         print "<table>"
-        print "<caption>CHAMPIONS</caption>"
+        print "<caption>WLR CHAMPIONS</caption>"
         print "<tr class=\"header\">"
         print "<th>Season</th>"
         print "<th>Player</th>"
         print "<th style=\"cursor:pointer;\" title=\"Win loss ratio\">WLR</th>"
-        print "<th style=\"cursor:pointer;\" title=\"Points per game\">PPG</th>"
         print "<th style=\"cursor:pointer;\" title=\"Games played\">GP</th>"
         print "<th style=\"cursor:pointer;\" title=\"Wins\">W</th>"
         print "<th style=\"cursor:pointer;\" title=\"Losses\">L</th>"
         print "<th style=\"cursor:pointer;\" title=\"Overtime wins\">OTW</th>"
+        print "<th style=\"cursor:pointer;\" title=\"Goals for\">GF</th>"
+        print "<th style=\"cursor:pointer;\" title=\"Goals against\">GA</th>"
+        print "<th style=\"cursor:pointer;\" title=\"Goal difference\">DIFF</th>"
+        print "</tr>"
+
+        for season in [ season for season in self.model.seasons if season != self.model.current_season ]:
+            player = self.model.get_wlr_leader(season=season)
+            print "<tr class=\"player\">"
+            print "<th>%s</th>"   % season.replace("_", " ").upper()
+            print "<th>%s</th>"   % player.name
+            print "<th>%.2f</th>" % player.wlr
+            print "<th>%d</th>"   % player.gp
+            print "<th>%d</th>"   % (player.w - player.otw)
+            print "<th>%d</th>"   % player.l
+            print "<th>%d</th>"   % player.otw
+            print "<th>%d</th>"   % player.gf
+            print "<th>%d</th>"   % player.ga
+            print "<th>%d</th>"   % player.diff
+            print "</tr>"
+        print "</table>"
+
+    def _print_ppg_champions_table(self):
+        print "<table>"
+        print "<caption>PPG CHAMPIONS</caption>"
+        print "<tr class=\"header\">"
+        print "<th>Season</th>"
+        print "<th>Player</th>"
+        print "<th style=\"cursor:pointer;\" title=\"Points per game\">PPG</th>"
+        print "<th style=\"cursor:pointer;\" title=\"Games played\">GP</th>"
+        print "<th style=\"cursor:pointer;\" title=\"Wins\">W</th>"
+        print "<th style=\"cursor:pointer;\" title=\"Losses\">L</th>"
         print "<th style=\"cursor:pointer;\" title=\"Overtime losses\">OTL</th>"
         print "<th style=\"cursor:pointer;\" title=\"Goals for\">GF</th>"
         print "<th style=\"cursor:pointer;\" title=\"Goals against\">GA</th>"
@@ -176,16 +235,14 @@ class HtmlView():
         print "</tr>"
 
         for season in [ season for season in self.model.seasons if season != self.model.current_season ]:
-            player = self.model.get_leader(season=season)
+            player = self.model.get_ppg_leader(season=season)
             print "<tr class=\"player\">"
             print "<th>%s</th>"   % season.replace("_", " ").upper()
             print "<th>%s</th>"   % player.name
-            print "<th>%.2f</th>" % player.wlr
             print "<th>%.2f</th>" % player.ppg
             print "<th>%d</th>"   % player.gp
-            print "<th>%d</th>"   % (player.w - player.otw)
+            print "<th>%d</th>"   % player.w
             print "<th>%d</th>"   % (player.l - player.otl)
-            print "<th>%d</th>"   % player.otw
             print "<th>%d</th>"   % player.otl
             print "<th>%d</th>"   % player.gf
             print "<th>%d</th>"   % player.ga
@@ -203,7 +260,7 @@ class HtmlView():
         print "</tr>"
 
         printed = {}
-        for player in self.model.player_list:
+        for player in self.model.player_wlr_list:
             printed[player.name] = []
             for away_player, count in player.match_counts.iteritems():
                 if away_player in printed and not player.name in printed[away_player]:
@@ -229,7 +286,7 @@ class HtmlView():
         for player_name, player in self.model.player_dict.iteritems():
             least_played_player = self.model.get_least_played_player(player_name)
             player_least_played_games = self.model.get_player_least_played_games([player_name])
-            leader = self.model.get_leader([player_name])
+            leader = self.model.get_wlr_leader([player_name])
             print "<tr class=\"player\">"
             print "<th>%s</th>" % player.name
             print "<th>%s</th>" % least_played_player.name
@@ -243,12 +300,16 @@ class HtmlView():
         print "<html>"
         print "<head><title>NHL STEGEN 3.0</title><link rel=\"stylesheet\" href=\"styles.css\"></head>"
         print "<body>"
-        self._print_stats_table()
+        self._print_wlr_stats_table()
+        print "<br>"
+        self._print_ppg_stats_table()
         print "<br>"
         self._print_match_count_table()
         print "<br>"
         self._print_suggestions_table()
         print "<br>"
-        self._print_champions_table()
+        self._print_wlr_champions_table()
+        print "<br>"
+        self._print_ppg_champions_table()
         print "</body>"
         print "</html>"

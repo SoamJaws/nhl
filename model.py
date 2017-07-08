@@ -6,6 +6,8 @@ import operator
 
 class Player:
 
+    MAIN_CMP_FACTOR = "wlr"
+
     def __init__(self, name):
         self.name = name
         self.gp = 0
@@ -18,7 +20,7 @@ class Player:
         self.match_counts = {}
 
     def __cmp__(self, other):
-        for prop in [ "wlr" , "diff" , "gp" , "ot" ]:
+        for prop in [ Player.MAIN_CMP_FACTOR , "diff" , "gp" , "ot" ]:
             result = cmp(getattr(self, prop), getattr(other, prop))
             if result != 0:
                 return result
@@ -67,10 +69,12 @@ class Model:
         # "GA"   : Goals against
         # "DIFF" : Goal difference
         self.player_dicts = {}
-        self.player_lists = {}
+        self.player_wlr_lists = {}
+        self.player_ppg_lists = {}
         for season, data in self.data.iteritems():
             self.player_dicts[season] = {}
-            self.player_lists[season] = []
+            self.player_wlr_lists[season] = []
+            self.player_ppg_lists[season] = []
             for entry in self.data[season]:
                 home = entry["home"]
                 away = entry["away"]
@@ -119,8 +123,14 @@ class Model:
                 for name2 in self.player_dicts[season]:
                     if not (name1 == name2 or name2 in player.match_counts):
                         player.match_counts[name2] = 0
-            self.player_lists[season] = list(self.player_dicts[season].values())
-            self.player_lists[season].sort(reverse=True)
+
+            Player.MAIN_CMP_FACTOR = "wlr"
+            self.player_wlr_lists[season] = list(self.player_dicts[season].values())
+            self.player_wlr_lists[season].sort(reverse=True)
+
+            Player.MAIN_CMP_FACTOR = "ppg"
+            self.player_ppg_lists[season] = list(self.player_dicts[season].values())
+            self.player_ppg_lists[season].sort(reverse=True)
 
     def add(self, home, away, home_score, away_score, overtime):
         if not self.current_season in self.data:
@@ -152,7 +162,15 @@ class Model:
         player_least_played_games_name = min(filtered_players.values(), key=operator.attrgetter('gp')).name
         return self.player_dicts[season][player_least_played_games_name]
 
-    def get_leader(self, excluded_players=[], season=None):
+    def get_wlr_leader(self, excluded_players=[], season=None):
+        Player.MAIN_CMP_FACTOR = "wlr"
+        return self._get_leader(excluded_players, season)
+
+    def get_ppg_leader(self, excluded_players=[], season=None):
+        Player.MAIN_CMP_FACTOR = "ppg"
+        return self._get_leader(excluded_players, season)
+
+    def _get_leader(self, excluded_players, season):
         if not season:
             season = self.current_season
         filtered_players = { pn: p for (pn, p) in self.player_dicts[season].iteritems() if pn not in excluded_players }
@@ -168,8 +186,12 @@ class Model:
         return self.player_dicts[self.current_season]
 
     @property
-    def player_list(self):
-        return self.player_lists[self.current_season]
+    def player_wlr_list(self):
+        return self.player_wlr_lists[self.current_season]
+
+    @property
+    def player_ppg_list(self):
+        return self.player_ppg_lists[self.current_season]
 
     @property
     def seasons(self):
