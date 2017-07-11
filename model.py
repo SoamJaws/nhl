@@ -17,7 +17,8 @@ class Player:
         self.otl = 0
         self.gf = 0
         self.ga = 0
-        self.match_counts = {}
+        self.win_counts = {}
+        self.loss_counts = {}
 
     def __cmp__(self, other):
         for prop in [ Player.MAIN_CMP_FACTOR , "diff" , "gp" , "ot" ]:
@@ -39,6 +40,10 @@ class Player:
     @property
     def diff(self):
         return self.gf - self.ga
+
+    @property
+    def match_counts(self):
+        return dict(self.win_counts.items() + self.loss_counts.items() + [(k, self.win_counts[k] + self.loss_counts[k]) for k in set(self.loss_counts) & set(self.win_counts)])
 
 
 class Model:
@@ -98,31 +103,40 @@ class Model:
                 away_player.gf += away_score
                 away_player.ga += home_score
 
-                if not away in home_player.match_counts:
-                    home_player.match_counts[away] = 1
-                else:
-                    home_player.match_counts[away] += 1
-                if not home in away_player.match_counts:
-                    away_player.match_counts[home] = 1
-                else:
-                    away_player.match_counts[home] += 1
-
                 if home_score > away_score:
                     away_player.l += 1
                     home_player.w += 1
                     if OT:
                         home_player.otw += 1
                         away_player.otl += 1
+                    if not away in home_player.win_counts:
+                        home_player.win_counts[away] = 1
+                    else:
+                        home_player.win_counts[away] += 1
+                    if not home in away_player.loss_counts:
+                        away_player.loss_counts[home] = 1
+                    else:
+                        away_player.loss_counts[home] += 1
                 elif home_score < away_score:
                     home_player.l += 1
                     away_player.w += 1
                     if OT:
                         away_player.otw += 1
                         home_player.otl += 1
+                    if not away in home_player.loss_counts:
+                        home_player.loss_counts[away] = 1
+                    else:
+                        home_player.loss_counts[away] += 1
+                    if not home in away_player.win_counts:
+                        away_player.win_counts[home] = 1
+                    else:
+                        away_player.win_counts[home] += 1
             for name1, player in self.player_dicts[season].iteritems():
                 for name2 in self.player_dicts[season]:
-                    if not (name1 == name2 or name2 in player.match_counts):
-                        player.match_counts[name2] = 0
+                    if not (name1 == name2 or name2 in player.win_counts):
+                        player.win_counts[name2] = 0
+                    if not (name1 == name2 or name2 in player.loss_counts):
+                        player.loss_counts[name2] = 0
 
             Player.MAIN_CMP_FACTOR = "wlr"
             self.player_wlr_lists[season] = list(self.player_dicts[season].values())
