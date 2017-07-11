@@ -257,6 +257,7 @@ class HtmlView():
         print "<th>Player</th>"
         print "<th>Player</th>"
         print "<th>Games played</th>"
+        print "<th>Results</th>"
         print "</tr>"
 
         printed = {}
@@ -268,6 +269,7 @@ class HtmlView():
                     print "<th>%s</th>" % player.name
                     print "<th>%s</th>" % away_player
                     print "<th>%d</th>" % count
+                    print "<th>%d - %d</th>" % (player.win_counts[away_player], self.model.player_dict[away_player].win_counts[player.name])
                     print "</tr>"
                     printed[player.name].append(away_player)
         print "</table>"
