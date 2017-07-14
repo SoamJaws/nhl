@@ -594,15 +594,15 @@
             "JONATAN": 4,
             "home": "JONATAN",
             "away": "JOHAN3",
-            "JOHAN3": 2,
-            "OT": false
+            "OT": false,
+            "JOHAN3": 2
         },
         {
             "home": "JONAS",
             "away": "JOHAN3",
-            "JOHAN3": 2,
+            "OT": true,
             "JONAS": 3,
-            "OT": true
+            "JOHAN3": 2
         }
     ]
 }
