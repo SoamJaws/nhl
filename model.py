@@ -30,12 +30,12 @@ class Player:
     @property
     def wlr(self):
         wins = (self.w - self.otw) + self.otw * 0.5
-        return wins/float(self.l) if self.l > 0 else float('inf')
+        return round(wins/float(self.l) if self.l > 0 else float('inf'), 2)
 
     @property
     def ppg(self):
         totalgames = self.w + self.l
-        return (self.w * 2 + self.otl) / float(totalgames)
+        return round((self.w * 2 + self.otl) / float(totalgames), 2)
 
     @property
     def diff(self):
